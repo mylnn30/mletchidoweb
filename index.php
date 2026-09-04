@@ -372,7 +372,7 @@ $testimonials = [
             <h2 id="cta-title">Take the Next Step Toward Your<br>Financial Goals</h2>
             <p>Whether you're planning a major purchase, growing your business, or managing life's important expenses, Mletchido Financial Group is here to provide financing you can trust.</p>
             <div class="hero-actions justify-content-center">
-                <a class="btn btn-light" href="mailto:loans@mletchidofinancialgroup.com">Apply Now</a>
+                <a class="btn btn-light" href="register.php">Apply Now</a>
                 <a class="btn btn-outline-light" href="mailto:loans@mletchidofinancialgroup.com">Talk to a Loan Specialist</a>
             </div>
         </div>

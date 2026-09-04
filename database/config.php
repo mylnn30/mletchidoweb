@@ -7,16 +7,17 @@ $db_name = "mletchido";
 
 //make connection
 
-try {
-
-
 
 $conn = mysqli_connect($db_server, $db_user, $db_password, $db_name);
-}
 
-    catch (mysqli_sql_exception ) {
-        echo "COULDNT CONNECT";
-}
+//
+   if (!$conn) {
+    die("could not connect: ". mysqli_connect_error());
+
+   }
+
+   
+
 
 //if ($conn) {
     //echo "Connected!";
