@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         );
 
         if ($result === true) {
-            header("Location: loan-application.php?success=1");
+            header("Location: loan_application.php?success=1");
             exit;
         }
 
@@ -46,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <header class="dashboard-topbar">
     <div class="topbar-brand">
-        <img src="images/logo.png" alt="Mletchido Financial Group logo" class="topbar-logo">
+        <img src="./assets/home_01.png" alt="Mletchido Financial Group logo" class="topbar-logo">
         Mletchido Financial Group
     </div>
     <nav class="topbar-nav">
@@ -90,13 +90,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             type="radio"
                             name="loan_type"
                             value="<?php echo htmlspecialchars($key, ENT_QUOTES, "UTF-8"); ?>"
-                            data-min="<?php echo (int) $type["min_term"]; ?>"
-                            data-max="<?php echo (int) $type["max_term"]; ?>"
+                            data-terms="<?php echo htmlspecialchars(implode(",", $type["terms"]), ENT_QUOTES, "UTF-8"); ?>"
                             <?php echo (($_POST["loan_type"] ?? "") === $key) ? "checked" : ""; ?>
                             required
                         >
                         <span class="loan-type-name"><?php echo htmlspecialchars($type["label"], ENT_QUOTES, "UTF-8"); ?></span>
-                        <span class="loan-type-terms"><?php echo (int) $type["min_term"]; ?>–<?php echo (int) $type["max_term"]; ?> Months</span>
+                        <span class="loan-type-terms"><?php echo (int) $type["terms"][0]; ?>–<?php echo (int) end($type["terms"]); ?> Months</span>
                     </label>
                 <?php endforeach; ?>
             </div>
@@ -104,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <p class="field-error"><?php echo htmlspecialchars($errors["loan_type"], ENT_QUOTES, "UTF-8"); ?></p>
             <?php endif; ?>
 
-            <form action="loan-application.php" method="POST" class="loan-form" novalidate>
+            <form action="loan_application.php" method="POST" class="loan-form" novalidate>
 
                 <div class="form-row">
 
@@ -168,32 +167,43 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <script>
 // Term dropdown options depend on which loan type card is selected.
-// The min/max come from data-min / data-max on each radio button,
-// which the server populated from the exact same get_loan_types()
-// data used for validation -- so the client and server can never disagree.
+// Each type's exact list of terms comes from data-terms, sourced
+// from the same get_loan_types() data used for validation -- so the
+// client and server can never disagree on what's allowed.
 (function () {
     const radios = document.querySelectorAll('input[name="loan_type"]');
+    const cards = document.querySelectorAll('.loan-type-card');
     const termSelect = document.getElementById("term");
     const postedTerm = "<?php echo (int) ($_POST["term"] ?? 0); ?>";
 
-    const commonTerms = [12, 24, 36, 60, 84, 120, 180, 240, 300, 360];
+    // Belt-and-suspenders: force the radio checked and fire change
+    // manually when the card is clicked, in case the browser doesn't
+    // reliably forward the click from label to input in this layout.
+    cards.forEach(function (card) {
+        card.addEventListener("click", function () {
+            const radio = card.querySelector('input[name="loan_type"]');
+            if (radio && !radio.checked) {
+                radio.checked = true;
+                radio.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+        });
+    });
 
-    function populateTerms(min, max) {
+    function formatTermLabel(months) {
+        if (months % 12 === 0) {
+            const years = months / 12;
+            return months + " Months (" + years + (years === 1 ? " Year" : " Years") + ")";
+        }
+        return months + " Months";
+    }
+
+    function populateTerms(terms) {
         termSelect.innerHTML = "";
 
-        const options = commonTerms.filter(function (t) {
-            return t >= min && t <= max;
-        });
-
-        if (!options.includes(min)) options.unshift(min);
-        if (!options.includes(max)) options.push(max);
-
-        options.sort(function (a, b) { return a - b; });
-
-        options.forEach(function (months) {
+        terms.forEach(function (months) {
             const opt = document.createElement("option");
             opt.value = months;
-            opt.textContent = months + " Months";
+            opt.textContent = formatTermLabel(months);
             if (String(months) === postedTerm) {
                 opt.selected = true;
             }
@@ -203,11 +213,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     radios.forEach(function (radio) {
         radio.addEventListener("change", function () {
-            populateTerms(parseInt(radio.dataset.min, 10), parseInt(radio.dataset.max, 10));
+            const terms = radio.dataset.terms.split(",").map(Number);
+            populateTerms(terms);
         });
 
         if (radio.checked) {
-            populateTerms(parseInt(radio.dataset.min, 10), parseInt(radio.dataset.max, 10));
+            const terms = radio.dataset.terms.split(",").map(Number);
+            populateTerms(terms);
         }
     });
 })();

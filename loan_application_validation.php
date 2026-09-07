@@ -1,33 +1,29 @@
 <?php
 
 /**
- * The four loan types and their allowed term ranges (in months),
- * matching the "Financing Solutions" section on index.php exactly.
- * Reuse this array anywhere the loan types need to be listed
- * (the form dropdown, the term dropdown, validation) so they can
- * never drift out of sync with each other or with the homepage.
+ * The four loan types, each with a realistic, fixed list of
+ * repayment terms (in months) instead of a free-typed number.
+ * These match the general term ranges shown on the homepage,
+ * but broken into sensible steps a lender would actually offer.
+ * Reused by the form dropdown AND validation, so both always agree.
  */
 function get_loan_types() {
     return [
         "home" => [
             "label" => "Home Loan",
-            "min_term" => 120,
-            "max_term" => 360,
+            "terms" => [60, 120, 180, 240, 300, 360], // 5, 10, 15, 20, 25, 30 yrs
         ],
         "business" => [
             "label" => "Business Loan",
-            "min_term" => 12,
-            "max_term" => 84,
+            "terms" => [12, 24, 36, 48, 60, 72, 84], // 1–7 yrs
         ],
         "personal" => [
             "label" => "Personal Loan",
-            "min_term" => 12,
-            "max_term" => 60,
+            "terms" => [12, 18, 24, 36, 48, 60], // 1–5 yrs (with a 1.5 yr step)
         ],
         "asset_backed" => [
             "label" => "Asset-Backed Loan",
-            "min_term" => 24,
-            "max_term" => 120,
+            "terms" => [24, 36, 48, 60, 72, 84, 96, 108, 120], // 2–10 yrs
         ],
     ];
 }
@@ -56,19 +52,18 @@ function validate_loan_application($loan_type, $amount, $term, $purpose) {
         $errors["amount"] = "Loan amount cannot exceed ₱50,000,000.";
     }
 
-    /* TERM (depends on which loan type was picked) */
+    /* TERM — must be one of the fixed options for the chosen loan type */
 
     if ($term === "" || $term === null) {
         $errors["term"] = "Please select a repayment term.";
     } elseif (!ctype_digit((string) $term)) {
         $errors["term"] = "Please select a valid repayment term.";
     } elseif (isset($loan_types[$loan_type])) {
-        $min = $loan_types[$loan_type]["min_term"];
-        $max = $loan_types[$loan_type]["max_term"];
+        $allowed_terms = $loan_types[$loan_type]["terms"];
 
-        if ((int) $term < $min || (int) $term > $max) {
-            $errors["term"] = "For a " . $loan_types[$loan_type]["label"]
-                . ", the term must be between {$min} and {$max} months.";
+        if (!in_array((int) $term, $allowed_terms, true)) {
+            $errors["term"] = "Please select one of the available terms for a "
+                . $loan_types[$loan_type]["label"] . ".";
         }
     }
 

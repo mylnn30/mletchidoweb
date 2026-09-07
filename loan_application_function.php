@@ -36,6 +36,32 @@ function submit_loan_application($user_id, $loan_type, $amount, $term, $purpose)
 }
 
 
+function get_loan_application_by_id($application_id, $user_id) {
+    global $conn;
+
+    $sql = "SELECT id, loan_type, amount, term_months, purpose, status, submitted_at
+            FROM `loan_applications`
+            WHERE id = ? AND user_id = ?
+            LIMIT 1";
+
+    $stmt = mysqli_prepare($conn, $sql);
+
+    if (!$stmt) {
+        return null;
+    }
+
+    mysqli_stmt_bind_param($stmt, "ii", $application_id, $user_id);
+    mysqli_stmt_execute($stmt);
+
+    $result = mysqli_stmt_get_result($stmt);
+    $application = mysqli_fetch_assoc($result);
+
+    mysqli_stmt_close($stmt);
+
+    return $application ?: null;
+}
+
+
 function get_user_loan_applications($user_id) {
     global $conn;
 
