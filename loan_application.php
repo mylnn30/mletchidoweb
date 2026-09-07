@@ -82,6 +82,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </div>
             <?php endif; ?>
 
+            <form action="loan_application.php" method="POST" class="loan-form" novalidate>
+
             <!-- LOAN TYPE CARDS (matches the 4 services on the homepage) -->
             <div class="loan-type-grid">
                 <?php foreach ($loan_types as $key => $type): ?>
@@ -102,8 +104,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <?php if (isset($errors["loan_type"])): ?>
                 <p class="field-error"><?php echo htmlspecialchars($errors["loan_type"], ENT_QUOTES, "UTF-8"); ?></p>
             <?php endif; ?>
-
-            <form action="loan_application.php" method="POST" class="loan-form" novalidate>
 
                 <div class="form-row">
 

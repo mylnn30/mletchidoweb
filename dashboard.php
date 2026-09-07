@@ -51,7 +51,7 @@ $recent_activity = [];
             </h1>
             <p>Here's what's happening with your account today.</p>
         </div>
-        <a href="loan-application.php" class="welcome-cta">Apply for a Loan</a>
+        <a href="loan_application.php" class="welcome-cta">Apply for a Loan</a>
     </section>
 
     <section class="stat-row">
@@ -100,7 +100,7 @@ $recent_activity = [];
             <div class="card-icon">✦</div>
             <h2>Apply for a Loan</h2>
             <p>Ready to take the next step? Start a new loan application in minutes.</p>
-            <a href="loan-application.php" class="card-link">Apply Now →</a>
+            <a href="loan_application.php" class="card-link">Apply Now →</a>
         </div>
 
     </section>
