@@ -15,22 +15,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (empty($errors)) {
         $result = login_user($username, $password);
 
-        if ($result === true) {
-            // Rotate the session ID on privilege change to prevent
-            // session fixation (an ID issued pre-login should not
-            // remain valid post-login).
-            session_regenerate_id(true);
-
-            header("Location: dashboard.php");
-            exit;
-        }
+    if ($result === true) {
+    header("Location: dashboard.php");
+    exit;
+    }
 
         // Deliberately generic: don't reveal whether the username
         // exists or the password was wrong, which would let an
         // attacker enumerate valid usernames against this form.
         // If login_user() needs to report a specific reason for
         // debugging, log $result server-side rather than showing it.
-        $errors[] = "Invalid username or password.";
+    $errors[] = "Invalid username or password.";
     }
 }
 ?>

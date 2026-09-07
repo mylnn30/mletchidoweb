@@ -1,0 +1,258 @@
+/* ==========================================================================
+   Loan Application — Mletchido Financial Group
+   Matches css/dashboard.css palette (dark navy / blue).
+   ========================================================================== */
+
+:root {
+    --navy-950: #0a0f1e;
+    --navy-900: #0e1526;
+    --navy-800: #141d33;
+    --navy-700: #1c2740;
+    --line: #263153;
+    --blue-500: #3b6fed;
+    --blue-400: #5f8bf5;
+    --blue-glow: rgba(59, 111, 237, 0.35);
+    --red-400: #ed5f5f;
+    --text-hi: #eef1f8;
+    --text-lo: #8d97ad;
+    --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--navy-950);
+    color: var(--text-hi);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.5;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* Reuses the same top bar structure/classes as dashboard.php */
+.dashboard-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 40px;
+    background: var(--navy-900);
+    border-bottom: 1px solid var(--line);
+}
+
+.topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+
+.topbar-logo {
+    width: 28px;
+    height: auto;
+    display: block;
+}
+
+.topbar-nav { display: flex; gap: 28px; }
+
+.topbar-nav a {
+    font-size: 0.92rem;
+    color: var(--text-lo);
+    padding: 6px 0;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.topbar-nav a:hover,
+.topbar-nav a:focus-visible {
+    color: var(--text-hi);
+    border-bottom-color: var(--blue-500);
+}
+
+/* ---------- Page shell ---------- */
+
+.loan-page {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+}
+
+.loan-header h1 {
+    margin: 0 0 6px;
+    font-size: 1.7rem;
+    font-weight: 600;
+}
+
+.loan-header p {
+    margin: 0 0 32px;
+    color: var(--text-lo);
+    font-size: 0.95rem;
+}
+
+/* ---------- Loan type cards ---------- */
+
+.loan-type-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 8px;
+}
+
+.loan-type-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 18px 20px;
+    background: var(--navy-800);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.loan-type-card input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loan-type-card:has(input:checked) {
+    border-color: var(--blue-500);
+    background:
+        linear-gradient(160deg, rgba(59, 111, 237, 0.14), transparent 70%),
+        var(--navy-800);
+}
+
+.loan-type-card:has(input:focus-visible) {
+    outline: 2px solid var(--blue-500);
+    outline-offset: 2px;
+}
+
+.loan-type-name { font-weight: 600; font-size: 0.98rem; }
+.loan-type-terms { font-size: 0.82rem; color: var(--text-lo); }
+
+/* ---------- Form ---------- */
+
+.loan-form {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+
+.form-full { grid-column: 1 / -1; }
+
+label {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-hi);
+}
+
+.required-mark { color: var(--red-400); margin-left: 2px; }
+
+input[type="number"],
+select,
+textarea {
+    padding: 11px 14px;
+    background: var(--navy-800);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text-hi);
+    font-size: 0.92rem;
+    font-family: inherit;
+    transition: border-color 0.15s ease;
+}
+
+textarea { resize: vertical; }
+
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--blue-500);
+}
+
+.input-error { border-color: var(--red-400); }
+
+.field-error {
+    margin: 2px 0 0;
+    font-size: 0.82rem;
+    color: var(--red-400);
+}
+
+.form-error {
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    background: rgba(237, 95, 95, 0.12);
+    border: 1px solid rgba(237, 95, 95, 0.4);
+    border-radius: 8px;
+}
+
+.form-error p { margin: 0; font-size: 0.9rem; color: var(--red-400); }
+
+.loan-button {
+    align-self: flex-start;
+    padding: 13px 26px;
+    background: var(--blue-500);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.92rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.loan-button:hover,
+.loan-button:focus-visible {
+    background: var(--blue-400);
+    transform: translateY(-1px);
+}
+
+/* ---------- Success state ---------- */
+
+.loan-success {
+    text-align: center;
+    padding: 56px 24px;
+}
+
+.success-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(62, 207, 142, 0.15);
+    color: #3ecf8e;
+    border-radius: 50%;
+    font-size: 1.6rem;
+}
+
+.loan-success h1 { margin: 0 0 10px; font-size: 1.5rem; }
+.loan-success p { margin: 0 0 28px; color: var(--text-lo); }
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 600px) {
+    .loan-type-grid,
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .loan-page { padding: 32px 18px 60px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+}
