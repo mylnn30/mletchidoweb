@@ -83,10 +83,8 @@ $testimonials = [
         'image' => 'home_03.png'
     ]
 ];
-
 ?>
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -137,7 +135,6 @@ $testimonials = [
             <p class="hero-copy">Whether you're growing a business, purchasing a home, funding personal needs, or investing in new opportunities, Mletchido Financial Group provides flexible lending solutions designed around your financial goals.</p>
             <div class="hero-actions">
                 <a class="btn btn-primary" href="#calculator">Calculate Your Loan</a>
-                <a class="btn btn-outline-light" href="#apply">Speak with a Loan Specialist</a>
             </div>
             <ul class="trust-points" aria-label="Application benefits">
                 <li>Fast Loan Processing</li>
@@ -375,7 +372,6 @@ $testimonials = [
             <p>Whether you're planning a major purchase, growing your business, or managing life's important expenses, Mletchido Financial Group is here to provide financing you can trust.</p>
             <div class="hero-actions justify-content-center">
                 <a class="btn btn-light" href="register.php">Apply Now</a>
-                <a class="btn btn-outline-light" href="mailto:loans@mletchidofinancialgroup.com">Talk to a Loan Specialist</a>
             </div>
         </div>
     </section>

@@ -1,20 +1,42 @@
 <?php
 require_once "require_login.php";
+require_once "loan_application_function.php";
+require_once "loan_application_validation.php";
 
 $first_name = $_SESSION["first_name"] ?? "";
 $last_name  = $_SESSION["last_name"] ?? "";
 $username   = $_SESSION["username"] ?? "";
 $email      = $_SESSION["email"] ?? "";
 
-// TODO: replace with real queries once loan_applications table exists.
-// Kept as plain variables for now so the page has something to render.
+$loan_type_labels = get_loan_types();
+$applications = get_user_loan_applications($_SESSION["user_id"]);
+
+$active_count = 0;
+$approved_count = 0;
+$total_borrowed = 0.0;
+
+foreach ($applications as $app) {
+    if ($app["status"] === "pending") {
+        $active_count++;
+    } elseif ($app["status"] === "approved") {
+        $approved_count++;
+        $total_borrowed += (float) $app["amount"];
+    }
+}
+
 $stats = [
-    ["label" => "Active Applications", "value" => "0"],
-    ["label" => "Approved Loans", "value" => "0"],
-    ["label" => "Total Borrowed", "value" => "₱0.00"],
+    ["label" => "Active Applications", "value" => (string) $active_count],
+    ["label" => "Approved Loans", "value" => (string) $approved_count],
+    ["label" => "Total Borrowed", "value" => "₱" . number_format($total_borrowed, 2)],
 ];
 
-$recent_activity = [];
+// Show the 3 most recent applications on the dashboard card.
+$recent_activity = array_map(function ($app) use ($loan_type_labels) {
+    return [
+        "title" => $loan_type_labels[$app["loan_type"]]["label"] ?? $app["loan_type"],
+        "status" => $app["status"],
+    ];
+}, array_slice($applications, 0, 3));
 ?>
 
 <!DOCTYPE html>
@@ -29,7 +51,7 @@ $recent_activity = [];
 
 <header class="dashboard-topbar">
     <div class="topbar-brand">
-        <img src="./assets/home_01.png" alt="" class="topbar-logo">
+        <img src="./assets/home_01.png" alt="Mletchido Financial Group logo" class="topbar-logo">
         Mletchido Financial Group
     </div>
 

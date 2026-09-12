@@ -28,9 +28,52 @@ function get_loan_types() {
     ];
 }
 
-function validate_loan_application($loan_type, $amount, $term, $purpose) {
+/**
+ * Government-issued ID types accepted for the "Valid ID" upload.
+ * Shown as a dropdown so applicants pick from a fixed list instead
+ * of typing a free-text value that would be hard to standardize.
+ */
+function get_id_types() {
+    return [
+        "philippine_passport" => "Philippine Passport",
+        "drivers_license" => "Driver's License",
+        "sss_id" => "SSS ID",
+        "umid" => "UMID",
+        "philhealth_id" => "PhilHealth ID",
+        "postal_id" => "Postal ID",
+        "voters_id" => "Voter's ID",
+        "philsys_id" => "National ID (PhilSys)",
+        "tin_id" => "TIN ID",
+        "student_id" => "Student ID",
+    ];
+}
+
+/**
+ * Employment status options for the applicant.
+ */
+function get_employment_statuses() {
+    return [
+        "student" => "Student",
+        "employed" => "Employed",
+        "self_employed" => "Self-Employed",
+    ];
+}
+
+
+function validate_loan_application(
+    $loan_type,
+    $id_type,
+    $employment_status,
+    $occupation,
+    $monthly_income,
+    $amount,
+    $term,
+    $purpose
+) {
     $errors = [];
     $loan_types = get_loan_types();
+    $id_types = get_id_types();
+    $employment_statuses = get_employment_statuses();
 
     /* LOAN TYPE */
 
@@ -38,6 +81,42 @@ function validate_loan_application($loan_type, $amount, $term, $purpose) {
         $errors["loan_type"] = "Please select a loan type.";
     } elseif (!isset($loan_types[$loan_type])) {
         $errors["loan_type"] = "Please select a valid loan type.";
+    }
+
+    /* ID TYPE */
+
+    if ($id_type === "") {
+        $errors["id_type"] = "Please select the type of ID you're uploading.";
+    } elseif (!isset($id_types[$id_type])) {
+        $errors["id_type"] = "Please select a valid ID type.";
+    }
+
+    /* EMPLOYMENT STATUS */
+
+    if ($employment_status === "") {
+        $errors["employment_status"] = "Please select your employment status.";
+    } elseif (!isset($employment_statuses[$employment_status])) {
+        $errors["employment_status"] = "Please select a valid employment status.";
+    }
+
+    /* OCCUPATION */
+
+    if ($occupation === "") {
+        $errors["occupation"] = "Please tell us your occupation (or course, if a student).";
+    } elseif (strlen($occupation) > 100) {
+        $errors["occupation"] = "Occupation cannot be more than 100 characters.";
+    }
+
+    /* MONTHLY INCOME */
+
+    if ($monthly_income === "" || $monthly_income === null) {
+        $errors["monthly_income"] = "Monthly income is required.";
+    } elseif (!is_numeric($monthly_income)) {
+        $errors["monthly_income"] = "Please enter a valid amount.";
+    } elseif ((float) $monthly_income < 0) {
+        $errors["monthly_income"] = "Monthly income cannot be negative.";
+    } elseif ((float) $monthly_income > 10000000) {
+        $errors["monthly_income"] = "Please enter a realistic monthly income.";
     }
 
     /* AMOUNT */
@@ -73,6 +152,65 @@ function validate_loan_application($loan_type, $amount, $term, $purpose) {
         $errors["purpose"] = "Please tell us what the loan is for.";
     } elseif (strlen($purpose) > 500) {
         $errors["purpose"] = "Purpose cannot be more than 500 characters.";
+    }
+
+    return $errors;
+}
+
+
+/**
+ * Validates a single uploaded file for the "Valid ID" / "Proof of
+ * Income" fields. Only JPG and PNG are allowed. We don't trust the
+ * file extension or the browser-supplied MIME type alone -- both
+ * can be faked by renaming a file -- so we also call getimagesize()
+ * to confirm the file's actual content is a real image.
+ */
+function validate_uploaded_document($file, $field_label) {
+    // No file selected at all.
+    if (!isset($file) || $file["error"] === UPLOAD_ERR_NO_FILE) {
+        return "{$field_label} is required.";
+    }
+
+    if ($file["error"] !== UPLOAD_ERR_OK) {
+        return "There was a problem uploading your {$field_label}. Please try again.";
+    }
+
+    $max_bytes = 5 * 1024 * 1024; // 5 MB
+    if ($file["size"] > $max_bytes) {
+        return "{$field_label} must be smaller than 5MB.";
+    }
+
+    $allowed_extensions = ["jpg", "jpeg", "png"];
+    $extension = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
+
+    if (!in_array($extension, $allowed_extensions, true)) {
+        return "{$field_label} must be a JPG or PNG image.";
+    }
+
+    // Confirm the file's actual content is a real image, not just
+    // something renamed to look like one.
+    $image_info = @getimagesize($file["tmp_name"]);
+    $allowed_mime_types = ["image/jpeg", "image/png"];
+
+    if ($image_info === false || !in_array($image_info["mime"], $allowed_mime_types, true)) {
+        return "{$field_label} does not appear to be a valid image file.";
+    }
+
+    return null;
+}
+
+
+function validate_loan_documents($valid_id_file, $proof_of_income_file) {
+    $errors = [];
+
+    $valid_id_error = validate_uploaded_document($valid_id_file, "Valid ID");
+    if ($valid_id_error !== null) {
+        $errors["valid_id"] = $valid_id_error;
+    }
+
+    $proof_of_income_error = validate_uploaded_document($proof_of_income_file, "Proof of Income");
+    if ($proof_of_income_error !== null) {
+        $errors["proof_of_income"] = $proof_of_income_error;
     }
 
     return $errors;

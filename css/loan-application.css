@@ -1,46 +1,72 @@
+/* ==========================================================================
+   Apply for a Loan — Mletchido Financial Group
+   Self-contained stylesheet, aesthetic pass.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 :root {
-    --navy-950: #0a0f1e;
-    --navy-900: #0e1526;
-    --navy-800: #141d33;
-    --navy-700: #1c2740;
-    --line: #263153;
-    --blue-500: #3b6fed;
-    --blue-400: #5f8bf5;
-    --blue-glow: rgba(59, 111, 237, 0.35);
-    --red-400: #ed5f5f;
-    --text-hi: #eef1f8;
-    --text-lo: #8d97ad;
-    --radius: 10px;
+    --navy-950: #070b16;
+    --navy-900: #0d1424;
+    --navy-800: #131c30;
+    --navy-700: #1b2740;
+    --line: #24314f;
+    --blue-500: #4d7dff;
+    --blue-400: #6d95ff;
+    --blue-glow: rgba(77, 125, 255, 0.35);
+    --purple-glow: rgba(147, 91, 255, 0.22);
+    --green-400: #34d399;
+    --amber-400: #f5b850;
+    --red-400: #f2617a;
+    --text-hi: #f3f5fb;
+    --text-lo: #96a0b8;
+    --radius: 16px;
 }
 
-* { box-sizing: border-box; }
+* {
+    box-sizing: border-box;
+}
 
 body {
     margin: 0;
-    background: var(--navy-950);
+    background:
+        radial-gradient(circle at 12% -8%, rgba(77, 125, 255, 0.14), transparent 42%),
+        radial-gradient(circle at 100% 15%, var(--purple-glow), transparent 40%),
+        var(--navy-950);
     color: var(--text-hi);
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
 }
 
-a { color: inherit; text-decoration: none; }
+a {
+    color: inherit;
+    text-decoration: none;
+}
 
-/* Reuses the same top bar structure/classes as dashboard.php */
+/* ---------- Top bar ---------- */
+
 .dashboard-topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 18px 40px;
-    background: var(--navy-900);
+    background: rgba(13, 20, 36, 0.75);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .topbar-brand {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 1.05rem;
+    letter-spacing: -0.01em;
 }
 
 .topbar-logo {
@@ -49,40 +75,119 @@ a { color: inherit; text-decoration: none; }
     display: block;
 }
 
-.topbar-nav { display: flex; gap: 28px; }
+.topbar-nav {
+    display: flex;
+    gap: 8px;
+}
 
 .topbar-nav a {
-    font-size: 0.92rem;
+    font-size: 0.9rem;
+    font-weight: 500;
     color: var(--text-lo);
-    padding: 6px 0;
-    border-bottom: 2px solid transparent;
-    transition: color 0.15s ease, border-color 0.15s ease;
+    padding: 8px 14px;
+    border-radius: 999px;
+    transition: color 0.15s ease, background 0.15s ease;
 }
 
 .topbar-nav a:hover,
 .topbar-nav a:focus-visible {
     color: var(--text-hi);
-    border-bottom-color: var(--blue-500);
+    background: var(--navy-800);
+}
+
+.topbar-nav a.is-active {
+    color: var(--text-hi);
+    background: var(--navy-700);
 }
 
 /* ---------- Page shell ---------- */
 
 .loan-page {
-    max-width: 780px;
+    max-width: 820px;
     margin: 0 auto;
-    padding: 48px 24px 80px;
+    padding: 44px 24px 80px;
+}
+
+.loan-container {
+    animation: page-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes page-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Header banner ---------- */
+
+.loan-header {
+    position: relative;
+    padding: 32px 36px;
+    margin-bottom: 32px;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    background: linear-gradient(135deg, #1b2b57 0%, #101a33 55%, #0d1424 100%);
+    overflow: hidden;
+}
+
+.loan-header::before {
+    content: "";
+    position: absolute;
+    width: 240px;
+    height: 240px;
+    top: -110px;
+    right: -50px;
+    border-radius: 50%;
+    background: var(--blue-glow);
+    filter: blur(50px);
+    pointer-events: none;
+}
+
+.loan-header h1,
+.loan-header p {
+    position: relative;
+    z-index: 1;
 }
 
 .loan-header h1 {
-    margin: 0 0 6px;
-    font-size: 1.7rem;
-    font-weight: 600;
+    margin: 0 0 8px;
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
 }
 
 .loan-header p {
-    margin: 0 0 32px;
+    margin: 0;
     color: var(--text-lo);
-    font-size: 0.95rem;
+    font-size: 0.96rem;
+}
+
+/* ---------- Section headers ---------- */
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 36px 0 18px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.section-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--line), transparent);
+}
+
+.loan-form > .section-title:first-child {
+    margin-top: 0;
+}
+
+.section-subtitle {
+    margin: -12px 0 16px;
+    font-size: 0.85rem;
+    color: var(--text-lo);
 }
 
 /* ---------- Loan type cards ---------- */
@@ -99,12 +204,34 @@ a { color: inherit; text-decoration: none; }
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 18px 20px;
+    padding: 18px 20px 18px 24px;
     background: var(--navy-800);
     border: 1px solid var(--line);
-    border-radius: var(--radius);
+    border-radius: 14px;
     cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    overflow: hidden;
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.loan-type-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--line);
+    transition: background 0.18s ease;
+}
+
+.loan-type-card:nth-of-type(1)::before { background: var(--blue-400); opacity: 0.35; }
+.loan-type-card:nth-of-type(2)::before { background: var(--green-400); opacity: 0.35; }
+.loan-type-card:nth-of-type(3)::before { background: var(--amber-400); opacity: 0.35; }
+.loan-type-card:nth-of-type(4)::before { background: #c084fc; opacity: 0.35; }
+
+.loan-type-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px -14px rgba(0, 0, 0, 0.6);
 }
 
 .loan-type-card input {
@@ -116,9 +243,12 @@ a { color: inherit; text-decoration: none; }
 
 .loan-type-card:has(input:checked) {
     border-color: var(--blue-500);
-    background:
-        linear-gradient(160deg, rgba(59, 111, 237, 0.14), transparent 70%),
-        var(--navy-800);
+    background: linear-gradient(160deg, rgba(77, 125, 255, 0.16), transparent 70%), var(--navy-800);
+}
+
+.loan-type-card:has(input:checked)::before {
+    opacity: 1 !important;
+    background: var(--blue-500) !important;
 }
 
 .loan-type-card:has(input:focus-visible) {
@@ -126,13 +256,19 @@ a { color: inherit; text-decoration: none; }
     outline-offset: 2px;
 }
 
-.loan-type-name { font-weight: 600; font-size: 0.98rem; }
-.loan-type-terms { font-size: 0.82rem; color: var(--text-lo); }
+.loan-type-name {
+    font-weight: 700;
+    font-size: 0.98rem;
+}
 
-/* ---------- Form ---------- */
+.loan-type-terms {
+    font-size: 0.82rem;
+    color: var(--text-lo);
+}
+
+/* ---------- Form layout ---------- */
 
 .loan-form {
-    margin-top: 28px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -144,41 +280,75 @@ a { color: inherit; text-decoration: none; }
     gap: 20px;
 }
 
-.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
 
-.form-full { grid-column: 1 / -1; }
+.form-full {
+    grid-column: 1 / -1;
+}
 
 label {
     font-size: 0.88rem;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--text-hi);
 }
 
-.required-mark { color: var(--red-400); margin-left: 2px; }
+.required-mark {
+    color: var(--red-400);
+    margin-left: 2px;
+}
 
+/* ---------- Inputs ---------- */
+
+input[type="text"],
+input[type="email"],
 input[type="number"],
 select,
 textarea {
-    padding: 11px 14px;
+    padding: 12px 14px;
     background: var(--navy-800);
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: 12px;
     color: var(--text-hi);
     font-size: 0.92rem;
     font-family: inherit;
-    transition: border-color 0.15s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-textarea { resize: vertical; }
+textarea {
+    resize: vertical;
+}
 
-input[type="number"]:focus,
+input:focus,
 select:focus,
 textarea:focus {
     outline: none;
     border-color: var(--blue-500);
+    box-shadow: 0 0 0 4px var(--blue-glow);
 }
 
-.input-error { border-color: var(--red-400); }
+input::placeholder,
+textarea::placeholder {
+    color: #5b6785;
+}
+
+select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2396a0b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+.input-error {
+    border-color: var(--red-400);
+}
 
 .field-error {
     margin: 2px 0 0;
@@ -187,68 +357,218 @@ textarea:focus {
 }
 
 .form-error {
-    padding: 12px 16px;
-    margin-bottom: 20px;
-    background: rgba(237, 95, 95, 0.12);
-    border: 1px solid rgba(237, 95, 95, 0.4);
-    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 4px;
+    background: rgba(242, 97, 122, 0.12);
+    border: 1px solid rgba(242, 97, 122, 0.4);
+    border-radius: 12px;
 }
 
-.form-error p { margin: 0; font-size: 0.9rem; color: var(--red-400); }
+.form-error p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--red-400);
+    font-weight: 500;
+}
 
-.loan-button {
-    align-self: flex-start;
-    padding: 13px 26px;
+/* ---------- File inputs ---------- */
+
+input[type="file"] {
+    padding: 12px 14px;
+    background: var(--navy-800);
+    border: 1.5px dashed var(--line);
+    border-radius: 12px;
+    color: var(--text-lo);
+    font-size: 0.85rem;
+    font-family: inherit;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+input[type="file"]:hover {
+    border-color: var(--blue-400);
+    background: var(--navy-700);
+}
+
+input[type="file"]::file-selector-button {
+    padding: 8px 18px;
+    margin-right: 14px;
     background: var(--blue-500);
     color: #fff;
     font-weight: 600;
-    font-size: 0.92rem;
+    font-size: 0.82rem;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    transition: background 0.15s ease, transform 0.15s ease;
+    transition: background 0.15s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background: var(--blue-400);
+}
+
+/* ---------- Account info box (read-only) ---------- */
+
+.account-info-box {
+    position: relative;
+    padding: 20px 24px;
+    background: var(--navy-700);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.account-info-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 180px;
+}
+
+.field-label {
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-lo);
+    font-weight: 700;
+}
+
+.field-value {
+    font-size: 0.95rem;
+    color: var(--text-hi);
+    font-weight: 500;
+}
+
+.account-info-note {
+    width: 100%;
+    margin: 4px 0 0;
+    font-size: 0.8rem;
+    color: var(--text-lo);
+}
+
+.account-info-note a {
+    color: var(--blue-400);
+    font-weight: 600;
+}
+
+.account-info-note a:hover {
+    color: var(--blue-500);
+}
+
+/* ---------- Submit button ---------- */
+
+.loan-button {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 30px;
+    background: var(--blue-500);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 10px 26px -8px var(--blue-glow);
+    transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.loan-button::after {
+    content: "→";
+    transition: transform 0.15s ease;
 }
 
 .loan-button:hover,
 .loan-button:focus-visible {
     background: var(--blue-400);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px -8px var(--blue-glow);
+}
+
+.loan-button:hover::after {
+    transform: translateX(3px);
 }
 
 /* ---------- Success state ---------- */
 
 .loan-success {
     text-align: center;
-    padding: 56px 24px;
+    padding: 72px 24px;
 }
 
 .success-icon {
-    width: 56px;
-    height: 56px;
-    margin: 0 auto 18px;
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 22px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(62, 207, 142, 0.15);
-    color: #3ecf8e;
+    background: rgba(52, 211, 153, 0.15);
+    color: var(--green-400);
     border-radius: 50%;
-    font-size: 1.6rem;
+    font-size: 1.9rem;
+    box-shadow: 0 0 0 8px rgba(52, 211, 153, 0.06);
 }
 
-.loan-success h1 { margin: 0 0 10px; font-size: 1.5rem; }
-.loan-success p { margin: 0 0 28px; color: var(--text-lo); }
+.loan-success h1 {
+    margin: 0 0 10px;
+    font-size: 1.7rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.loan-success p {
+    margin: 0 0 30px;
+    color: var(--text-lo);
+}
 
 /* ---------- Responsive ---------- */
 
 @media (max-width: 600px) {
+    .dashboard-topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px 20px;
+        position: static;
+    }
+
+    .topbar-nav {
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .loan-page {
+        padding: 28px 18px 60px;
+    }
+
+    .loan-header {
+        padding: 24px 22px;
+    }
+
     .loan-type-grid,
     .form-row {
         grid-template-columns: 1fr;
     }
 
-    .loan-page { padding: 32px 18px 60px; }
+    .account-info-field {
+        min-width: 0;
+    }
+}
+
+/* ---------- Accessibility ---------- */
+
+a:focus-visible,
+button:focus-visible {
+    outline: 2px solid var(--blue-500);
+    outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
 }
