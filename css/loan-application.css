@@ -161,13 +161,57 @@ a {
     font-size: 0.96rem;
 }
 
+/* ---------- Multi-step layout (numbered marker + connecting line) ---------- */
+
+.form-section {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 18px;
+    align-items: start;
+}
+
+.section-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.section-number {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--navy-800);
+    border: 1px solid var(--blue-500);
+    color: var(--text-hi);
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 0 0 4px rgba(77, 125, 255, 0.08);
+}
+
+.section-line {
+    flex: 1;
+    width: 1px;
+    min-height: 32px;
+    margin-top: 10px;
+    background: linear-gradient(var(--line), transparent 90%);
+}
+
+.section-body {
+    min-width: 0;
+}
+
 /* ---------- Section headers ---------- */
 
 .section-title {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 36px 0 18px;
+    margin: 0 0 18px;
     font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: -0.01em;
@@ -180,31 +224,27 @@ a {
     background: linear-gradient(90deg, var(--line), transparent);
 }
 
-.loan-form > .section-title:first-child {
-    margin-top: 0;
-}
-
 .section-subtitle {
-    margin: -12px 0 16px;
+    margin: -10px 0 16px;
     font-size: 0.85rem;
     color: var(--text-lo);
 }
 
 /* ---------- Loan type cards ---------- */
 
-.loan-type-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+.loan-type-list {
+    display: flex;
+    flex-direction: column;
     gap: 14px;
-    margin-bottom: 8px;
+    margin-bottom: 20px;
 }
 
 .loan-type-card {
     position: relative;
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 18px 20px 18px 24px;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px 14px 24px;
     background: var(--navy-800);
     border: 1px solid var(--line);
     border-radius: 14px;
@@ -229,9 +269,14 @@ a {
 .loan-type-card:nth-of-type(3)::before { background: var(--amber-400); opacity: 0.35; }
 .loan-type-card:nth-of-type(4)::before { background: #c084fc; opacity: 0.35; }
 
+.loan-type-card:nth-of-type(1) .loan-type-icon { color: var(--blue-400); }
+.loan-type-card:nth-of-type(2) .loan-type-icon { color: var(--green-400); }
+.loan-type-card:nth-of-type(3) .loan-type-icon { color: var(--amber-400); }
+.loan-type-card:nth-of-type(4) .loan-type-icon { color: #c084fc; }
+
 .loan-type-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 28px -14px rgba(0, 0, 0, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.6);
 }
 
 .loan-type-card input {
@@ -239,6 +284,47 @@ a {
     opacity: 0;
     width: 1px;
     height: 1px;
+}
+
+.loan-type-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    background: var(--navy-700);
+    color: var(--text-lo);
+    transition: background 0.18s ease, color 0.18s ease;
+}
+
+.loan-type-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.loan-type-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.loan-type-terms {
+    font-size: 0.8rem;
+    color: var(--text-lo);
+    white-space: nowrap;
+}
+
+.loan-type-check {
+    flex-shrink: 0;
+    opacity: 0;
+    transform: scale(0.6);
+    color: var(--blue-500);
+    transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .loan-type-card:has(input:checked) {
@@ -251,19 +337,19 @@ a {
     background: var(--blue-500) !important;
 }
 
+.loan-type-card:has(input:checked) .loan-type-icon {
+    background: var(--blue-500);
+    color: #fff;
+}
+
+.loan-type-card:has(input:checked) .loan-type-check {
+    opacity: 1;
+    transform: scale(1);
+}
+
 .loan-type-card:has(input:focus-visible) {
     outline: 2px solid var(--blue-500);
     outline-offset: 2px;
-}
-
-.loan-type-name {
-    font-weight: 700;
-    font-size: 0.98rem;
-}
-
-.loan-type-terms {
-    font-size: 0.82rem;
-    color: var(--text-lo);
 }
 
 /* ---------- Form layout ---------- */
@@ -271,13 +357,18 @@ a {
 .loan-form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 28px;
 }
 
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
+}
+
+.form-row-tight {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
 }
 
 .form-group {
@@ -305,6 +396,7 @@ label {
 
 input[type="text"],
 input[type="email"],
+input[type="tel"],
 input[type="number"],
 select,
 textarea {
@@ -417,6 +509,7 @@ input[type="file"]::file-selector-button:hover {
     display: flex;
     flex-wrap: wrap;
     gap: 24px;
+    margin-bottom: 24px;
 }
 
 .account-info-field {
@@ -454,6 +547,28 @@ input[type="file"]::file-selector-button:hover {
 
 .account-info-note a:hover {
     color: var(--blue-500);
+}
+
+/* Boxed callout used for the employed-only / self-employed-only /
+   employment-certificate fields. When it's ALSO a .form-group (the
+   single employment-certificate field), we keep form-group's own
+   tighter label/input/error spacing instead of overriding it. */
+
+.conditional-fields,
+.conditional-group {
+    padding: 18px 20px;
+    margin: 4px 0;
+    background: rgba(77, 125, 255, 0.05);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    animation: page-in 0.25s ease both;
+}
+
+.conditional-fields:not(.form-group),
+.conditional-group:not(.form-group) {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 /* ---------- Submit button ---------- */
@@ -526,6 +641,12 @@ input[type="file"]::file-selector-button:hover {
 
 /* ---------- Responsive ---------- */
 
+@media (max-width: 700px) {
+    .form-row-tight {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
 @media (max-width: 600px) {
     .dashboard-topbar {
         flex-direction: column;
@@ -548,13 +669,35 @@ input[type="file"]::file-selector-button:hover {
         padding: 24px 22px;
     }
 
-    .loan-type-grid,
-    .form-row {
+    .form-row,
+    .form-row-tight {
         grid-template-columns: 1fr;
     }
 
     .account-info-field {
         min-width: 0;
+    }
+
+    .form-section {
+        grid-template-columns: 26px 1fr;
+        gap: 12px;
+    }
+
+    .section-number {
+        width: 26px;
+        height: 26px;
+        font-size: 0.75rem;
+    }
+
+    .loan-type-card {
+        padding: 12px 14px 12px 18px;
+        gap: 12px;
+    }
+
+    .loan-type-text {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
     }
 }
 

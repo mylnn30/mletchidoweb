@@ -1,7 +1,6 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once "session_bootstrap.php";
+start_secure_session();
 
 if (empty($_SESSION["user_id"])) {
     header("Location: login.php");

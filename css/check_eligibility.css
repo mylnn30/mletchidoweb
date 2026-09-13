@@ -1,0 +1,475 @@
+/* ==========================================================================
+   Check Eligibility — Mletchido Financial Group
+   Dedicated stylesheet for check_eligibility.php. Loads alongside the
+   shared css/style.css (which provides the site nav/footer/base tokens
+   from :root) and only styles this page's hero + form + checklist.
+   ========================================================================== */
+
+/* ---------- Hero band ---------- */
+
+.eligibility-hero {
+    padding: 5.5rem 0 3.5rem;
+    text-align: center;
+    background:
+        radial-gradient(circle at 15% 0%, rgba(255,255,255,.12), transparent 45%),
+        linear-gradient(135deg, var(--blue-bright) 0%, var(--blue) 55%, var(--navy-2) 120%);
+}
+
+.eligibility-hero .eyebrow {
+    color: #a9e3ff;
+}
+
+.eligibility-hero h1 {
+    color: #fff;
+    margin: 0 auto .9rem;
+    max-width: 640px;
+}
+
+.eligibility-hero p {
+    color: #e2eaf9;
+    max-width: 560px;
+    margin: 0 auto;
+    font-size: .92rem;
+}
+
+/* ---------- Section shell ---------- */
+
+.eligibility-section {
+    padding: 4.5rem 0 6rem;
+    background: var(--navy);
+}
+
+.eligibility-layout {
+    display: grid;
+    grid-template-columns: .82fr 1.18fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+/* ---------- Left column: why / benefits ---------- */
+
+.eligibility-intro {
+    position: sticky;
+    top: 6.5rem;
+}
+
+.eligibility-intro .card-eyebrow {
+    color: var(--blue-bright);
+}
+
+.eligibility-intro h2 {
+    margin: .4rem 0 1rem;
+}
+
+.eligibility-intro > p {
+    color: var(--muted);
+    font-size: .9rem;
+    margin-bottom: 1.6rem;
+}
+
+.eligibility-benefits {
+    list-style: none;
+    margin: 0 0 2rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+}
+
+.eligibility-benefits li {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    font-size: .85rem;
+    color: #dce4ef;
+}
+
+.eligibility-benefits li strong {
+    display: block;
+    color: var(--text);
+    font-size: .88rem;
+}
+
+.eligibility-benefits li span.icon {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(46, 103, 255, .16);
+    color: var(--blue-bright);
+    font-size: .85rem;
+}
+
+.eligibility-requirements-note {
+    padding: 1.1rem 1.3rem;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--muted);
+    font-size: .76rem;
+    line-height: 1.6;
+}
+
+/* ---------- Form card ---------- */
+
+.eligibility-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 25px 60px rgba(0,0,0,.35);
+}
+
+.eligibility-card > header {
+    margin-bottom: 1.6rem;
+}
+
+.eligibility-card .card-eyebrow {
+    color: var(--blue-bright);
+}
+
+.eligibility-card h3 {
+    margin: .3rem 0 0;
+    font-size: 1.3rem;
+}
+
+.eligibility-field {
+    display: flex;
+    flex-direction: column;
+    gap: .45rem;
+    margin-bottom: 1.4rem;
+}
+
+.eligibility-field label {
+    font-size: .74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+}
+
+.eligibility-field input[type="number"],
+.eligibility-field select {
+    background: var(--navy-2);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: .8rem .95rem;
+    color: var(--text);
+    font-family: inherit;
+    font-size: .9rem;
+    width: 100%;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.eligibility-field input[type="number"]:focus,
+.eligibility-field select:focus {
+    outline: none;
+    border-color: var(--blue-bright);
+    box-shadow: 0 0 0 3px rgba(46, 103, 255, .22);
+}
+
+.eligibility-field select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23aab5c8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 15px;
+    padding-right: 38px;
+}
+
+/* ---------- Amount range slider ---------- */
+
+.eligibility-amount-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.eligibility-amount-value {
+    color: var(--blue-bright);
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.eligibility-field input[type="range"] {
+    accent-color: var(--blue-bright);
+    width: 100%;
+}
+
+.eligibility-range-labels {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: .65rem;
+}
+
+/* ---------- Repayment term chips ---------- */
+
+.eligibility-field fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.eligibility-field legend {
+    font-size: .74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+    padding: 0;
+    margin-bottom: .5rem;
+}
+
+.eligibility-term-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: .4rem;
+}
+
+.eligibility-term-chip {
+    position: relative;
+    display: block;
+}
+
+.eligibility-term-chip input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.eligibility-term-chip span {
+    display: block;
+    text-align: center;
+    padding: .6rem .3rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: .72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease, color .15s ease;
+}
+
+.eligibility-term-chip input:checked + span {
+    background: var(--blue-bright);
+    border-color: var(--blue-bright);
+    color: #fff;
+}
+
+.eligibility-term-chip input:focus-visible + span {
+    outline: 2px solid var(--blue-bright);
+    outline-offset: 2px;
+}
+
+/* ---------- Submit button ---------- */
+
+.eligibility-submit {
+    width: 100%;
+    padding: .9rem 1.5rem;
+    margin-top: .4rem;
+    background: var(--blue-bright);
+    color: #fff;
+    font-weight: 700;
+    font-size: .92rem;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background .15s ease, transform .15s ease;
+}
+
+.eligibility-submit:hover {
+    background: var(--blue);
+    transform: translateY(-1px);
+}
+
+.eligibility-disclaimer {
+    color: #7f8da4;
+    font-size: .68rem;
+    line-height: 1.6;
+    margin: 1rem 0 0;
+}
+
+.eligibility-alert {
+    color: #ffb4b4;
+    background: rgba(190,50,50,.15);
+    border: 1px solid rgba(255,100,100,.3);
+    padding: .7rem .9rem;
+    border-radius: 8px;
+    font-size: .78rem;
+    margin-bottom: 1.4rem;
+}
+
+/* ---------- Result: checklist ---------- */
+
+.eligibility-checklist {
+    list-style: none;
+    padding: 1.4rem;
+    margin: 0 0 1.6rem;
+    background: var(--navy-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+}
+
+.eligibility-check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    font-size: .82rem;
+    color: #dce4ef;
+}
+
+.eligibility-check-icon {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .7rem;
+    font-weight: 700;
+    margin-top: .05rem;
+}
+
+.eligibility-check-item.is-pass .eligibility-check-icon {
+    background: rgba(67, 214, 160, .18);
+    color: #43d6a0;
+}
+
+.eligibility-check-item.is-fail .eligibility-check-icon {
+    background: rgba(242, 97, 122, .18);
+    color: #f2617a;
+}
+
+.eligibility-check-item.is-fail {
+    color: #97a2b8;
+}
+
+/* ---------- Result: verdict card ---------- */
+
+.eligibility-verdict {
+    border-radius: 14px;
+    padding: 1.8rem;
+    text-align: center;
+}
+
+.eligibility-verdict-pass {
+    background: linear-gradient(160deg, rgba(67, 214, 160, .14), transparent 70%), var(--navy-2);
+    border: 1px solid rgba(67, 214, 160, .4);
+}
+
+.eligibility-verdict-fail {
+    background: linear-gradient(160deg, rgba(242, 97, 122, .12), transparent 70%), var(--navy-2);
+    border: 1px solid rgba(242, 97, 122, .35);
+}
+
+.eligibility-verdict-icon {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto .9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.eligibility-verdict-pass .eligibility-verdict-icon {
+    background: rgba(67, 214, 160, .18);
+    color: #43d6a0;
+}
+
+.eligibility-verdict-fail .eligibility-verdict-icon {
+    background: rgba(242, 97, 122, .18);
+    color: #f2617a;
+}
+
+.eligibility-verdict-label {
+    display: block;
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: .5rem;
+}
+
+.eligibility-verdict-pass .eligibility-verdict-label { color: #43d6a0; }
+.eligibility-verdict-fail .eligibility-verdict-label { color: #f2617a; }
+
+.eligibility-verdict-message {
+    color: #c9d3df;
+    font-size: .8rem;
+    line-height: 1.65;
+    margin: 0 0 1.3rem;
+    max-width: 420px;
+    margin-inline: auto;
+}
+
+.eligibility-payment-estimate {
+    border-top: 1px solid var(--line);
+    padding-top: 1.1rem;
+    margin-bottom: 1.3rem;
+}
+
+.eligibility-payment-estimate span {
+    display: block;
+    color: var(--muted);
+    font-size: .72rem;
+}
+
+.eligibility-payment-estimate strong {
+    display: block;
+    color: #55c9ff;
+    font-size: 1.55rem;
+    margin: .3rem 0;
+}
+
+.eligibility-payment-estimate small {
+    color: var(--muted);
+    font-size: .72rem;
+}
+
+.eligibility-payment-estimate small b {
+    color: #42d49d;
+    margin-left: .3rem;
+}
+
+.eligibility-verdict .btn {
+    width: 100%;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 900px) {
+    .eligibility-layout {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .eligibility-intro {
+        position: static;
+    }
+}
+
+@media (max-width: 560px) {
+    .eligibility-hero {
+        padding: 4rem 0 2.5rem;
+    }
+
+    .eligibility-card {
+        padding: 1.6rem;
+    }
+
+    .eligibility-term-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

@@ -119,6 +119,7 @@ $testimonials = [
                     <li class="nav-item"><a class="nav-link" href="#process">Process</a></li>
                     <li class="nav-item"><a class="nav-link" href="#about">About Us</a></li>
                     <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="check_eligibility.php">Check Eligibility</a></li>
                     <li class="nav-item ms-lg-2"><a class="btn btn-primary btn-sm px-4" href="#apply">Apply Now</a></li>
                 </ul>
             </div>
@@ -372,6 +373,7 @@ $testimonials = [
             <p>Whether you're planning a major purchase, growing your business, or managing life's important expenses, Mletchido Financial Group is here to provide financing you can trust.</p>
             <div class="hero-actions justify-content-center">
                 <a class="btn btn-light" href="register.php">Apply Now</a>
+                <a class="btn btn-outline-light" href="check_eligibility.php">Check Eligibility</a>
             </div>
         </div>
     </section>

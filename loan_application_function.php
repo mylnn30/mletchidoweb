@@ -2,11 +2,6 @@
 
 require_once "database/config.php";
 
-/**
- * Where uploaded loan documents are stored on disk, and the matching
- * relative path used in the database / <img> tags. Kept as a single
- * source of truth so the folder name only has to change in one place.
- */
 function get_loan_documents_upload_dir() {
     return __DIR__ . "/uploads/loan_documents/";
 }
@@ -16,12 +11,6 @@ function get_loan_documents_upload_url() {
 }
 
 
-/**
- * Moves an already-validated uploaded file into the uploads folder
- * with a random, unpredictable filename (never the user's original
- * filename or anything guessable) so files can't collide or be
- * overwritten, and can't be found by guessing another user's filename.
- */
 function save_uploaded_document($file, $user_id, $label) {
     $upload_dir = get_loan_documents_upload_dir();
 
@@ -48,12 +37,20 @@ function submit_loan_application(
     $id_type,
     $employment_status,
     $occupation,
+    $employer_name,
+    $length_of_employment,
+    $employer_contact_number,
+    $business_name,
+    $business_type,
     $monthly_income,
     $amount,
     $term,
+    $payment_frequency,
     $purpose,
     $valid_id_file,
-    $proof_of_income_file
+    $proof_of_income_file,
+    $proof_of_address_file,
+    $employment_certificate_file
 ) {
     global $conn;
 
@@ -67,10 +64,39 @@ function submit_loan_application(
         return "Could not save your Proof of Income. Please try again.";
     }
 
+    $proof_of_address_path = save_uploaded_document($proof_of_address_file, $user_id, "proof_of_address");
+    if ($proof_of_address_path === null) {
+        return "Could not save your Proof of Address. Please try again.";
+    }
+
+    // Optional -- only save it if one was actually attached.
+    $employment_certificate_path = null;
+    $certificate_was_attached = isset($employment_certificate_file)
+        && $employment_certificate_file["error"] !== UPLOAD_ERR_NO_FILE;
+
+    if ($certificate_was_attached) {
+        $employment_certificate_path = save_uploaded_document($employment_certificate_file, $user_id, "employment_certificate");
+        if ($employment_certificate_path === null) {
+            return "Could not save your Employment Certificate. Please try again.";
+        }
+    }
+
+    // Employer/business fields only apply to certain employment
+    // statuses -- store NULL for the ones that don't apply, rather
+    // than an empty string, since the columns are nullable for this.
+    $employer_name = ($employment_status === "employed") ? $employer_name : null;
+    $length_of_employment = ($employment_status === "employed") ? $length_of_employment : null;
+    $employer_contact_number = ($employment_status === "employed") ? $employer_contact_number : null;
+    $business_name = ($employment_status === "self_employed") ? $business_name : null;
+    $business_type = ($employment_status === "self_employed") ? $business_type : null;
+
     $sql = "INSERT INTO `loan_applications`
-        (user_id, loan_type, id_type, employment_status, occupation, monthly_income,
-         amount, term_months, purpose, valid_id_path, proof_of_income_path)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        (user_id, loan_type, id_type, employment_status, occupation,
+         employer_name, length_of_employment, employer_contact_number,
+         business_name, business_type, monthly_income,
+         amount, term_months, payment_frequency, purpose,
+         valid_id_path, proof_of_income_path, proof_of_address_path, employment_certificate_path)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = mysqli_prepare($conn, $sql);
 
@@ -80,18 +106,26 @@ function submit_loan_application(
 
     mysqli_stmt_bind_param(
         $stmt,
-        "issssddisss",
+        "isssssssssddissssss",
         $user_id,
         $loan_type,
         $id_type,
         $employment_status,
         $occupation,
+        $employer_name,
+        $length_of_employment,
+        $employer_contact_number,
+        $business_name,
+        $business_type,
         $monthly_income,
         $amount,
         $term,
+        $payment_frequency,
         $purpose,
         $valid_id_path,
-        $proof_of_income_path
+        $proof_of_income_path,
+        $proof_of_address_path,
+        $employment_certificate_path
     );
 
     if (mysqli_stmt_execute($stmt)) {
@@ -108,9 +142,12 @@ function submit_loan_application(
 function get_loan_application_by_id($application_id, $user_id) {
     global $conn;
 
-    $sql = "SELECT id, loan_type, id_type, employment_status, occupation, monthly_income,
-                   amount, term_months, purpose,
-                   valid_id_path, proof_of_income_path, status, submitted_at
+    $sql = "SELECT id, loan_type, id_type, employment_status, occupation,
+                   employer_name, length_of_employment, employer_contact_number,
+                   business_name, business_type, monthly_income,
+                   amount, term_months, payment_frequency, purpose,
+                   valid_id_path, proof_of_income_path, proof_of_address_path, employment_certificate_path,
+                   status, submitted_at
             FROM `loan_applications`
             WHERE id = ? AND user_id = ?
             LIMIT 1";

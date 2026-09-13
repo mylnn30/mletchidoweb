@@ -2,6 +2,22 @@
 require_once "require_login.php";
 require_once "loan_application_function.php";
 require_once "loan_application_validation.php";
+require_once "admin_function.php";
+require_once "csrf.php";
+
+// Admin accounts don't use the customer dashboard at all -- send them
+// straight to the admin panel instead.
+block_admin_from_customer_area();
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["mark_notification_read"])) {
+    if (csrf_verify($_POST["csrf_token"] ?? "")) {
+        mark_notification_read((int) $_POST["notification_id"], $_SESSION["user_id"]);
+    }
+    header("Location: dashboard.php");
+    exit;
+}
+
+$notifications = get_notifications_for_user($_SESSION["user_id"], true);
 
 $first_name = $_SESSION["first_name"] ?? "";
 $last_name  = $_SESSION["last_name"] ?? "";
@@ -64,6 +80,25 @@ $recent_activity = array_map(function ($app) use ($loan_type_labels) {
 </header>
 
 <main class="dashboard-page">
+
+    <?php if (!empty($notifications)): ?>
+        <section class="dashboard-card" style="margin-bottom: 20px;">
+            <h2>Notifications</h2>
+            <ul class="activity-list">
+                <?php foreach ($notifications as $n): ?>
+                    <li>
+                        <span><?php echo htmlspecialchars($n["message"], ENT_QUOTES, "UTF-8"); ?></span>
+                        <form action="dashboard.php" method="POST" class="inline-form" style="display:inline;">
+                            <?php csrf_field(); ?>
+                            <input type="hidden" name="mark_notification_read" value="1">
+                            <input type="hidden" name="notification_id" value="<?php echo (int) $n["id"]; ?>">
+                            <button type="submit" class="card-link" style="background:none; border:none; cursor:pointer;">Dismiss</button>
+                        </form>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </section>
+    <?php endif; ?>
 
     <section class="dashboard-welcome">
         <div>

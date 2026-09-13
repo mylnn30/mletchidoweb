@@ -1,6 +1,9 @@
 <?php
 require_once "require_login.php";
 require_once "profile_function.php";
+require_once "admin_function.php";
+
+block_admin_from_customer_area();
 
 $user = get_user_by_id($_SESSION["user_id"]);
 

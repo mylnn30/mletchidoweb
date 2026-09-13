@@ -167,6 +167,28 @@
     cursor: zoom-in;
 }
 
+/* ---------- Missing document placeholder ----------
+   Shown by render_document_field() whenever a document path is
+   empty or the file no longer exists on disk, instead of letting
+   the browser show a broken image icon. Lives at the top level
+   (NOT inside a media query) so it applies on every screen size. */
+
+.document-missing {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 220px;
+    height: 100px;
+    border-radius: 8px;
+    border: 1px dashed var(--line);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-lo);
+    font-size: 0.82rem;
+    font-style: italic;
+    text-align: center;
+    padding: 8px;
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 760px) {

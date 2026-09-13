@@ -1,31 +1,49 @@
 <?php
-session_start();
+require_once "session_bootstrap.php";
+start_secure_session();
 
+require_once "csrf.php";
 require_once "login_validation.php";
 require_once "login_function.php";
+require_once "admin_function.php";
 
 $errors = [];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $username = trim($_POST["username"] ?? "");
-    $password = $_POST["password"] ?? "";
 
-    $errors = validate_login($username, $password);
+    if (!csrf_verify($_POST["csrf_token"] ?? "")) {
+        $errors[] = "Your session has expired. Please try again.";
+    } else {
+        $username = trim($_POST["username"] ?? "");
+        $password = $_POST["password"] ?? "";
 
-    if (empty($errors)) {
-        $result = login_user($username, $password);
+        $errors = validate_login($username, $password);
 
-    if ($result === true) {
-    header("Location: dashboard.php");
-    exit;
-    }
+        if (empty($errors)) {
+            $result = login_user($username, $password);
 
-        // Deliberately generic: don't reveal whether the username
-        // exists or the password was wrong, which would let an
-        // attacker enumerate valid usernames against this form.
-        // If login_user() needs to report a specific reason for
-        // debugging, log $result server-side rather than showing it.
-    $errors[] = "Invalid username or password.";
+            if ($result === true) {
+                // Admin accounts only ever see the admin side of the
+                // site -- send them straight there instead of the
+                // customer dashboard.
+                if (user_is_admin($_SESSION["user_id"])) {
+                    header("Location: admin_dashboard.php");
+                } else {
+                    header("Location: dashboard.php");
+                }
+                exit;
+            }
+
+            // Deliberately generic in every case except the lockout
+            // notice itself: don't reveal whether the username exists
+            // or the password was wrong, which would let an attacker
+            // enumerate valid usernames against this form. The lockout
+            // message is safe to show as-is since it's shown the same
+            // way whether or not the username is real (see login_user()).
+            $errors[] = ($result === LOGIN_LOCKOUT_MESSAGE)
+                ? $result
+                : "Invalid username or password.";
+        }
     }
 }
 ?>
@@ -57,6 +75,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <?php endif; ?>
 
         <form action="login.php" method="POST" class="login-form" novalidate>
+
+            <?php csrf_field(); ?>
 
             <div class="form-group">
                 <label for="username">Username</label>

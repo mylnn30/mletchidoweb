@@ -1,14 +1,26 @@
 <?php
 require_once "require_login.php";
+require_once "csrf.php";
 require_once "loan_application_validation.php";
 require_once "loan_application_function.php";
 require_once "profile_function.php";
+require_once "admin_function.php";
+
+block_admin_from_customer_area();
 
 $loan_types = get_loan_types();
 $id_types = get_id_types();
 $employment_statuses = get_employment_statuses();
+$employment_lengths = get_employment_lengths();
+$business_types = get_business_types();
+$payment_frequencies = get_payment_frequencies();
 $errors = [];
 $success = isset($_GET["success"]) && $_GET["success"] === "1";
+
+// Drives which conditional field groups render visible/hidden on a
+// re-render after a validation error (JS takes over from there for
+// live toggling as the applicant changes the dropdown).
+$current_employment_status = $_POST["employment_status"] ?? "";
 
 $account = get_user_by_id($_SESSION["user_id"]);
 
@@ -22,14 +34,36 @@ $loan_type_icons = [
 ];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $loan_type         = $_POST["loan_type"] ?? "";
-    $id_type           = $_POST["id_type"] ?? "";
-    $employment_status = $_POST["employment_status"] ?? "";
-    $occupation        = trim($_POST["occupation"] ?? "");
-    $monthly_income    = trim($_POST["monthly_income"] ?? "");
-    $amount            = trim($_POST["amount"] ?? "");
-    $term              = $_POST["term"] ?? "";
-    $purpose           = trim($_POST["purpose"] ?? "");
+    if (!csrf_verify($_POST["csrf_token"] ?? "")) {
+        $errors["general"] = "Your session has expired. Please refresh the page and try again.";
+    } else {
+    $loan_type               = $_POST["loan_type"] ?? "";
+    $id_type                 = $_POST["id_type"] ?? "";
+    $employment_status       = $_POST["employment_status"] ?? "";
+    $occupation              = trim($_POST["occupation"] ?? "");
+    $employer_name           = trim($_POST["employer_name"] ?? "");
+    $length_of_employment    = $_POST["length_of_employment"] ?? "";
+    $employer_contact_number = trim($_POST["employer_contact_number"] ?? "");
+    $business_name           = trim($_POST["business_name"] ?? "");
+    $business_type           = $_POST["business_type"] ?? "";
+    $monthly_income          = trim($_POST["monthly_income"] ?? "");
+    $payment_frequency       = $_POST["payment_frequency"] ?? "";
+    $amount                  = trim($_POST["amount"] ?? "");
+    $term                    = $_POST["term"] ?? "";
+    $purpose                 = trim($_POST["purpose"] ?? "");
+
+    // Fields that don't apply to the chosen employment status are
+    // cleared before validation/storage, so a value typed then hidden
+    // by switching the dropdown never sneaks into the saved record.
+    if ($employment_status !== "employed") {
+        $employer_name = "";
+        $length_of_employment = "";
+        $employer_contact_number = "";
+    }
+    if ($employment_status !== "self_employed") {
+        $business_name = "";
+        $business_type = "";
+    }
 
     $errors = validate_loan_application(
         $loan_type,
@@ -39,12 +73,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $monthly_income,
         $amount,
         $term,
-        $purpose
+        $purpose,
+        $payment_frequency,
+        $employer_name,
+        $length_of_employment,
+        $employer_contact_number,
+        $business_name,
+        $business_type
     );
 
     $document_errors = validate_loan_documents(
         $_FILES["valid_id"] ?? null,
-        $_FILES["proof_of_income"] ?? null
+        $_FILES["proof_of_income"] ?? null,
+        $_FILES["proof_of_address"] ?? null,
+        $_FILES["employment_certificate"] ?? null,
+        $employment_status
     );
     $errors = array_merge($errors, $document_errors);
 
@@ -55,12 +98,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $id_type,
             $employment_status,
             $occupation,
+            $employer_name,
+            $length_of_employment,
+            $employer_contact_number,
+            $business_name,
+            $business_type,
             (float) $monthly_income,
+            $payment_frequency,
             (float) $amount,
             (int) $term,
             $purpose,
             $_FILES["valid_id"],
-            $_FILES["proof_of_income"]
+            $_FILES["proof_of_income"],
+            $_FILES["proof_of_address"],
+            $_FILES["employment_certificate"] ?? null
         );
 
         if ($result === true) {
@@ -69,6 +120,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         $errors["general"] = $result;
+    }
     }
 }
 ?>
@@ -122,6 +174,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <?php endif; ?>
 
             <form action="loan_application.php" method="POST" enctype="multipart/form-data" class="loan-form" novalidate>
+
+                <?php csrf_field(); ?>
 
                 <!-- STEP 1: LOAN TYPE -->
                 <div class="form-section">
@@ -192,6 +246,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 </select>
                                 <?php if (isset($errors["term"])): ?>
                                     <p class="field-error"><?php echo htmlspecialchars($errors["term"], ENT_QUOTES, "UTF-8"); ?></p>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="payment_frequency">Preferred Payment Frequency<span class="required-mark">*</span></label>
+                                <select
+                                    id="payment_frequency"
+                                    name="payment_frequency"
+                                    class="<?php echo isset($errors["payment_frequency"]) ? "input-error" : ""; ?>"
+                                    required
+                                >
+                                    <option value="">Select a frequency</option>
+                                    <?php foreach ($payment_frequencies as $key => $label): ?>
+                                        <option value="<?php echo htmlspecialchars($key, ENT_QUOTES, "UTF-8"); ?>"
+                                            <?php echo (($_POST["payment_frequency"] ?? "") === $key) ? "selected" : ""; ?>>
+                                            <?php echo htmlspecialchars($label, ENT_QUOTES, "UTF-8"); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <?php if (isset($errors["payment_frequency"])): ?>
+                                    <p class="field-error"><?php echo htmlspecialchars($errors["payment_frequency"], ENT_QUOTES, "UTF-8"); ?></p>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -289,8 +364,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         </div>
 
                         <div class="form-row">
-                            <div class="form-group">
-                                <label for="occupation">Occupation / Course (if student)<span class="required-mark">*</span></label>
+                            <div class="form-group form-full">
+                                <label for="occupation">Occupation / Job Title (or Course, if student)<span class="required-mark">*</span></label>
                                 <input
                                     type="text"
                                     id="occupation"
@@ -304,9 +379,106 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                     <p class="field-error"><?php echo htmlspecialchars($errors["occupation"], ENT_QUOTES, "UTF-8"); ?></p>
                                 <?php endif; ?>
                             </div>
+                        </div>
+
+                        <!-- EMPLOYED-ONLY FIELDS -->
+                        <div id="employed-fields" class="conditional-fields" style="<?php echo $current_employment_status === "employed" ? "" : "display:none;"; ?>">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="employer_name">Employer / Company Name<span class="required-mark">*</span></label>
+                                    <input
+                                        type="text"
+                                        id="employer_name"
+                                        name="employer_name"
+                                        placeholder="e.g. ABC Manufacturing Corp."
+                                        value="<?php echo htmlspecialchars($_POST["employer_name"] ?? "", ENT_QUOTES, "UTF-8"); ?>"
+                                        class="<?php echo isset($errors["employer_name"]) ? "input-error" : ""; ?>"
+                                    >
+                                    <?php if (isset($errors["employer_name"])): ?>
+                                        <p class="field-error"><?php echo htmlspecialchars($errors["employer_name"], ENT_QUOTES, "UTF-8"); ?></p>
+                                    <?php endif; ?>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="employer_contact_number">Employer Contact Number<span class="required-mark">*</span></label>
+                                    <input
+                                        type="tel"
+                                        id="employer_contact_number"
+                                        name="employer_contact_number"
+                                        placeholder="e.g. 09171234567"
+                                        value="<?php echo htmlspecialchars($_POST["employer_contact_number"] ?? "", ENT_QUOTES, "UTF-8"); ?>"
+                                        class="<?php echo isset($errors["employer_contact_number"]) ? "input-error" : ""; ?>"
+                                    >
+                                    <?php if (isset($errors["employer_contact_number"])): ?>
+                                        <p class="field-error"><?php echo htmlspecialchars($errors["employer_contact_number"], ENT_QUOTES, "UTF-8"); ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
 
                             <div class="form-group">
-                                <label for="monthly_income">Monthly Income (₱)<span class="required-mark">*</span></label>
+                                <label for="length_of_employment">Length of Employment<span class="required-mark">*</span></label>
+                                <select
+                                    id="length_of_employment"
+                                    name="length_of_employment"
+                                    class="<?php echo isset($errors["length_of_employment"]) ? "input-error" : ""; ?>"
+                                >
+                                    <option value="">Select a range</option>
+                                    <?php foreach ($employment_lengths as $key => $label): ?>
+                                        <option value="<?php echo htmlspecialchars($key, ENT_QUOTES, "UTF-8"); ?>"
+                                            <?php echo (($_POST["length_of_employment"] ?? "") === $key) ? "selected" : ""; ?>>
+                                            <?php echo htmlspecialchars($label, ENT_QUOTES, "UTF-8"); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <?php if (isset($errors["length_of_employment"])): ?>
+                                    <p class="field-error"><?php echo htmlspecialchars($errors["length_of_employment"], ENT_QUOTES, "UTF-8"); ?></p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <!-- SELF-EMPLOYED-ONLY FIELDS -->
+                        <div id="self-employed-fields" class="conditional-fields" style="<?php echo $current_employment_status === "self_employed" ? "" : "display:none;"; ?>">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="business_name">Business Name<span class="required-mark">*</span></label>
+                                    <input
+                                        type="text"
+                                        id="business_name"
+                                        name="business_name"
+                                        placeholder="e.g. Aling Nena's Sari-Sari Store"
+                                        value="<?php echo htmlspecialchars($_POST["business_name"] ?? "", ENT_QUOTES, "UTF-8"); ?>"
+                                        class="<?php echo isset($errors["business_name"]) ? "input-error" : ""; ?>"
+                                    >
+                                    <?php if (isset($errors["business_name"])): ?>
+                                        <p class="field-error"><?php echo htmlspecialchars($errors["business_name"], ENT_QUOTES, "UTF-8"); ?></p>
+                                    <?php endif; ?>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="business_type">Business Type<span class="required-mark">*</span></label>
+                                    <select
+                                        id="business_type"
+                                        name="business_type"
+                                        class="<?php echo isset($errors["business_type"]) ? "input-error" : ""; ?>"
+                                    >
+                                        <option value="">Select a business type</option>
+                                        <?php foreach ($business_types as $key => $label): ?>
+                                            <option value="<?php echo htmlspecialchars($key, ENT_QUOTES, "UTF-8"); ?>"
+                                                <?php echo (($_POST["business_type"] ?? "") === $key) ? "selected" : ""; ?>>
+                                                <?php echo htmlspecialchars($label, ENT_QUOTES, "UTF-8"); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <?php if (isset($errors["business_type"])): ?>
+                                        <p class="field-error"><?php echo htmlspecialchars($errors["business_type"], ENT_QUOTES, "UTF-8"); ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group form-full">
+                                <label for="monthly_income" id="monthly_income_label">Monthly Income (₱)<span class="required-mark">*</span></label>
                                 <input
                                     type="number"
                                     id="monthly_income"
@@ -364,6 +536,37 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 >
                                 <?php if (isset($errors["proof_of_income"])): ?>
                                     <p class="field-error"><?php echo htmlspecialchars($errors["proof_of_income"], ENT_QUOTES, "UTF-8"); ?></p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="proof_of_address">Proof of Address<span class="required-mark">*</span></label>
+                                <input
+                                    type="file"
+                                    id="proof_of_address"
+                                    name="proof_of_address"
+                                    accept="image/jpeg,image/png"
+                                    class="<?php echo isset($errors["proof_of_address"]) ? "input-error" : ""; ?>"
+                                    required
+                                >
+                                <?php if (isset($errors["proof_of_address"])): ?>
+                                    <p class="field-error"><?php echo htmlspecialchars($errors["proof_of_address"], ENT_QUOTES, "UTF-8"); ?></p>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="form-group conditional-fields" id="employment-certificate-field" style="<?php echo $current_employment_status === "employed" ? "" : "display:none;"; ?>">
+                                <label for="employment_certificate">Employment Certificate<span class="required-mark" id="employment_certificate_mark">*</span></label>
+                                <input
+                                    type="file"
+                                    id="employment_certificate"
+                                    name="employment_certificate"
+                                    accept="image/jpeg,image/png"
+                                    class="<?php echo isset($errors["employment_certificate"]) ? "input-error" : ""; ?>"
+                                >
+                                <?php if (isset($errors["employment_certificate"])): ?>
+                                    <p class="field-error"><?php echo htmlspecialchars($errors["employment_certificate"], ENT_QUOTES, "UTF-8"); ?></p>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -433,6 +636,60 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             populateTerms(terms);
         }
     });
+})();
+
+// Show only the employer fields or only the business fields depending
+// on the applicant's Employment Status, and switch the Monthly Income
+// label to "Estimated Monthly Income" for self-employed applicants.
+// The `required` attribute is toggled too so the browser doesn't block
+// submission on a hidden field -- the server re-checks all of this
+// regardless of what the client sends.
+(function () {
+    const employmentStatus = document.getElementById("employment_status");
+    const employedFields = document.getElementById("employed-fields");
+    const selfEmployedFields = document.getElementById("self-employed-fields");
+    const employmentCertificateField = document.getElementById("employment-certificate-field");
+    const employmentCertificateInput = document.getElementById("employment_certificate");
+    const employmentCertificateMark = document.getElementById("employment_certificate_mark");
+    const monthlyIncomeLabel = document.getElementById("monthly_income_label");
+
+    if (!employmentStatus) return;
+
+    function setGroupRequired(container, isRequired) {
+        if (!container) return;
+        container.querySelectorAll("input, select").forEach(function (field) {
+            field.required = isRequired;
+        });
+    }
+
+    function syncEmploymentFields() {
+        const status = employmentStatus.value;
+        const isEmployed = status === "employed";
+        const isSelfEmployed = status === "self_employed";
+
+        employedFields.style.display = isEmployed ? "" : "none";
+        setGroupRequired(employedFields, isEmployed);
+
+        selfEmployedFields.style.display = isSelfEmployed ? "" : "none";
+        setGroupRequired(selfEmployedFields, isSelfEmployed);
+
+        employmentCertificateField.style.display = isEmployed ? "" : "none";
+        if (employmentCertificateInput) {
+            employmentCertificateInput.required = isEmployed;
+        }
+        if (employmentCertificateMark) {
+            employmentCertificateMark.style.display = isEmployed ? "" : "none";
+        }
+
+        if (monthlyIncomeLabel) {
+            monthlyIncomeLabel.firstChild.textContent = isSelfEmployed
+                ? "Estimated Monthly Income (₱)"
+                : "Monthly Income (₱)";
+        }
+    }
+
+    employmentStatus.addEventListener("change", syncEmploymentFields);
+    syncEmploymentFields();
 })();
 </script>
 
