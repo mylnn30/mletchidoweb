@@ -66,21 +66,11 @@ $recent_activity = array_map(
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | Mletchido Financial Group</title>
-
-    <link
-        rel="stylesheet"
-        href="css/dashboard.css"
-    >
+    <link rel="stylesheet" href="css/dashboard.css">
 </head>
 
 <body>
@@ -88,94 +78,49 @@ $recent_activity = array_map(
 <header class="dashboard-topbar">
 
     <div class="topbar-brand">
-
         <img
             src="./assets/home_01.png"
             alt="Mletchido Financial Group logo"
             class="topbar-logo"
         >
-
         Mletchido Financial Group
-
     </div>
 
     <nav class="topbar-nav">
-
-        <a
-            href="dashboard.php"
-            class="is-active"
-        >
-            Dashboard
-        </a>
-
-        <a href="applications.php">
-            My Applications
-        </a>
-
-        <a href="payments.php">
-            Payments
-        </a>
-
+        <a href="dashboard.php" class="is-active">Dashboard</a>
+        <a href="applications.php">My Applications</a>
+        <a href="payments.php">Payments</a>
         <a href="notifications.php">
-            Notifications<?php
-            echo !empty($notifications)
-                ? " (" . count($notifications) . ")"
-                : "";
-            ?>
+            Notifications<?php echo !empty($notifications) ? " (" . count($notifications) . ")" : ""; ?>
         </a>
-
-        <a href="profile.php">
-            Profile
-        </a>
-
-        <a href="logout.php">
-            Sign Out
-        </a>
-
+        <a href="profile.php">Profile</a>
+        <a href="logout.php">Sign Out</a>
     </nav>
 
 </header>
 
-
 <main class="dashboard-page">
-
-
-    <!-- ==================== WELCOME ==================== -->
 
     <section class="dashboard-welcome">
 
         <div>
-
             <h1>
                 Welcome back,
-                <?php
-                echo htmlspecialchars(
-                    $first_name !== ""
-                        ? $first_name
-                        : $username,
+                <?php echo htmlspecialchars(
+                    $first_name !== "" ? $first_name : $username,
                     ENT_QUOTES,
                     "UTF-8"
-                );
-                ?>
+                ); ?>
             </h1>
 
-            <p>
-                Here's what's happening with your account today.
-            </p>
-
+            <p>Here's what's happening with your account today.</p>
         </div>
 
-        <a
-            href="loan_application.php"
-            class="welcome-cta"
-        >
+        <a href="loan_application.php" class="welcome-cta">
             Apply for a Loan
         </a>
 
     </section>
-
-
-    <!-- ==================== STATS ==================== -->
 
     <section class="stat-row">
 
@@ -184,27 +129,19 @@ $recent_activity = array_map(
             <div class="stat-tile">
 
                 <span class="stat-value">
-
-                    <?php
-                    echo htmlspecialchars(
+                    <?php echo htmlspecialchars(
                         $stat["value"],
                         ENT_QUOTES,
                         "UTF-8"
-                    );
-                    ?>
-
+                    ); ?>
                 </span>
 
                 <span class="stat-label">
-
-                    <?php
-                    echo htmlspecialchars(
+                    <?php echo htmlspecialchars(
                         $stat["label"],
                         ENT_QUOTES,
                         "UTF-8"
-                    );
-                    ?>
-
+                    ); ?>
                 </span>
 
             </div>
@@ -213,57 +150,37 @@ $recent_activity = array_map(
 
     </section>
 
-
-    <!-- ==================== NOTIFICATIONS ==================== -->
-
     <?php if (!empty($notifications)): ?>
 
         <section class="dashboard-card notification-card">
 
-            <h2>
-                Unread Notifications
-            </h2>
+            <h2>Unread Notifications</h2>
 
             <ul class="activity-list">
 
-                <?php foreach (
-                    array_slice($notifications, 0, 3)
-                    as $notification
-                ): ?>
+                <?php foreach (array_slice($notifications, 0, 3) as $notification): ?>
 
                     <li>
-
                         <span>
-
-                            <?php
-                            echo htmlspecialchars(
+                            <?php echo htmlspecialchars(
                                 $notification["message"],
                                 ENT_QUOTES,
                                 "UTF-8"
-                            );
-                            ?>
-
+                            ); ?>
                         </span>
-
                     </li>
 
                 <?php endforeach; ?>
 
             </ul>
 
-            <a
-                href="notifications.php"
-                class="card-link"
-            >
+            <a href="notifications.php" class="card-link">
                 View All Notifications →
             </a>
 
         </section>
 
     <?php endif; ?>
-
-
-    <!-- ==================== ACTIVE LOANS ==================== -->
 
     <?php if (!empty($active_loans)): ?>
 
@@ -277,19 +194,15 @@ $recent_activity = array_map(
                         LOAN REPAYMENT
                     </span>
 
-                    <h2>
-                        My Active Loans
-                    </h2>
+                    <h2>My Active Loans</h2>
 
                     <p>
-                        Track your balance, repayment progress,
-                        and upcoming payments.
+                        Track your balance, repayment progress, and upcoming payments.
                     </p>
 
                 </div>
 
             </div>
-
 
             <?php foreach ($active_loans as $loan): ?>
 
@@ -300,36 +213,26 @@ $recent_activity = array_map(
                     && $loan["next_due_date"] < date("Y-m-d")
                     && $loan["remaining_balance"] > 0;
 
-                $total_payable =
-                    (float) $loan["total_payable"];
-
-                $total_paid =
-                    (float) $loan["total_paid"];
-
-                $remaining =
-                    (float) $loan["remaining_balance"];
+                $total_payable = (float) $loan["total_payable"];
+                $total_paid = (float) $loan["total_paid"];
+                $remaining = (float) $loan["remaining_balance"];
 
                 $progress =
                     $total_payable > 0
                         ? ($total_paid / $total_payable) * 100
                         : 0;
 
-                $progress =
-                    min(100, max(0, $progress));
+                $progress = min(100, max(0, $progress));
 
                 ?>
 
                 <article class="loan-payment-card">
-
-
-                    <!-- LOAN HEADER -->
 
                     <div class="loan-payment-top">
 
                         <div>
 
                             <span class="loan-type">
-
                                 <?php
                                 echo htmlspecialchars(
                                     ucwords(
@@ -343,125 +246,66 @@ $recent_activity = array_map(
                                     "UTF-8"
                                 );
                                 ?>
-
                             </span>
 
                         </div>
 
-
-                        <span
-                            class="loan-status <?php
-                            echo $is_overdue
-                                ? "overdue"
-                                : "active";
-                            ?>"
-                        >
+                        <span class="loan-status <?php echo $is_overdue ? "overdue" : "active"; ?>">
 
                             <span class="status-dot"></span>
 
-                            <?php
-                            echo $is_overdue
-                                ? "Overdue"
-                                : "Active";
-                            ?>
+                            <?php echo $is_overdue ? "Overdue" : "Active"; ?>
 
                         </span>
 
                     </div>
-
-
-                    <!-- REMAINING BALANCE -->
 
                     <div class="loan-balance">
 
-                        <span>
-                            Remaining Balance
-                        </span>
+                        <span>Remaining Balance</span>
 
                         <strong>
-
-                            ₱<?php
-                            echo number_format(
-                                $remaining,
-                                2
-                            );
-                            ?>
-
+                            ₱<?php echo number_format($remaining, 2); ?>
                         </strong>
 
                     </div>
-
-
-                    <!-- PROGRESS -->
 
                     <div class="payment-progress">
 
                         <div class="progress-info">
 
-                            <span>
-                                Repayment Progress
-                            </span>
+                            <span>Repayment Progress</span>
 
                             <strong>
-
-                                <?php
-                                echo number_format(
-                                    $progress,
-                                    0
-                                );
-                                ?>%
-
+                                <?php echo number_format($progress, 0); ?>%
                             </strong>
 
                         </div>
-
 
                         <div class="progress-track">
 
                             <div
                                 class="progress-fill"
-                                style="width: <?php
-                                echo $progress;
-                                ?>%;"
+                                style="width: <?php echo $progress; ?>%;"
                             ></div>
 
                         </div>
 
-
                         <div class="progress-amounts">
 
                             <span>
-
-                                ₱<?php
-                                echo number_format(
-                                    $total_paid,
-                                    2
-                                );
-                                ?>
-                                paid
-
+                                ₱<?php echo number_format($total_paid, 2); ?> paid
                             </span>
 
                             <span>
-
-                                ₱<?php
-                                echo number_format(
-                                    $total_payable,
-                                    2
-                                ); ?>
-                                total
-
+                                ₱<?php echo number_format($total_payable, 2); ?> total
                             </span>
 
                         </div>
 
                     </div>
 
-
-                    <!-- LOAN DETAILS -->
-
                     <div class="loan-details">
-
 
                         <div class="loan-detail">
 
@@ -470,18 +314,13 @@ $recent_activity = array_map(
                             </span>
 
                             <strong>
-
-                                ₱<?php
-                                echo number_format(
+                                ₱<?php echo number_format(
                                     (float) $loan["amount"],
                                     2
-                                );
-                                ?>
-
+                                ); ?>
                             </strong>
 
                         </div>
-
 
                         <div class="loan-detail">
 
@@ -490,21 +329,13 @@ $recent_activity = array_map(
                             </span>
 
                             <strong>
-
-                                <?php
-                                echo number_format(
-                                    (float) (
-                                        $loan["interest_rate"]
-                                        ?? 0
-                                    ),
+                                <?php echo number_format(
+                                    (float) ($loan["interest_rate"] ?? 0),
                                     2
-                                );
-                                ?>%
-
+                                ); ?>%
                             </strong>
 
                         </div>
-
 
                         <div class="loan-detail">
 
@@ -513,33 +344,21 @@ $recent_activity = array_map(
                             </span>
 
                             <strong>
-
-                                ₱<?php
-                                echo number_format(
-                                    (float)
-                                    $loan["installment_amount"],
+                                ₱<?php echo number_format(
+                                    (float) $loan["installment_amount"],
                                     2
-                                );
-                                ?>
-
+                                ); ?>
                             </strong>
 
                             <small>
-
-                                <?php
-                                echo htmlspecialchars(
-                                    ucfirst(
-                                        $loan["payment_frequency"]
-                                    ),
+                                <?php echo htmlspecialchars(
+                                    ucfirst($loan["payment_frequency"]),
                                     ENT_QUOTES,
                                     "UTF-8"
-                                );
-                                ?>
-
+                                ); ?>
                             </small>
 
                         </div>
-
 
                         <div class="loan-detail">
 
@@ -547,28 +366,16 @@ $recent_activity = array_map(
                                 Next Due
                             </span>
 
-
                             <?php if ($loan["next_due_date"]): ?>
 
-                                <strong
-                                    class="<?php
-                                    echo $is_overdue
-                                        ? "text-overdue"
-                                        : "text-due";
-                                    ?>"
-                                >
+                                <strong class="<?php echo $is_overdue ? "text-overdue" : "text-due"; ?>">
 
-                                    <?php
-                                    echo date(
+                                    <?php echo date(
                                         "M j, Y",
-                                        strtotime(
-                                            $loan["next_due_date"]
-                                        )
-                                    );
-                                    ?>
+                                        strtotime($loan["next_due_date"])
+                                    ); ?>
 
                                 </strong>
-
 
                                 <?php if ($is_overdue): ?>
 
@@ -578,12 +385,9 @@ $recent_activity = array_map(
 
                                 <?php endif; ?>
 
-
                             <?php else: ?>
 
-                                <strong>
-                                    Not set
-                                </strong>
+                                <strong>Not set</strong>
 
                             <?php endif; ?>
 
@@ -591,42 +395,24 @@ $recent_activity = array_map(
 
                     </div>
 
-
-                    <!-- PAYMENT FOOTER -->
-
                     <div class="loan-payment-footer">
 
                         <span>
-
                             Total payable:
-
                             <strong>
-
-                                ₱<?php
-                                echo number_format(
+                                ₱<?php echo number_format(
                                     $total_payable,
                                     2
-                                );
-                                ?>
-
+                                ); ?>
                             </strong>
-
                         </span>
 
-
                         <a
-                            href="payments.php?loan_id=<?php
-                            echo (int) $loan["id"];
-                            ?>"
+                            href="payments.php?loan_id=<?php echo (int) $loan["id"]; ?>"
                             class="payment-action"
                         >
-
                             Make a Payment
-
-                            <span>
-                                →
-                            </span>
-
+                            <span>→</span>
                         </a>
 
                     </div>
@@ -639,13 +425,133 @@ $recent_activity = array_map(
 
     <?php endif; ?>
 
+    <!-- PAYMENT DESTINATIONS -->
 
-    <!-- ==================== DASHBOARD CARDS ==================== -->
+    <?php if (!empty($active_loans)): ?>
+
+        <section class="payment-destinations">
+
+            <div class="payment-header">
+
+                <span class="payment-eyebrow">
+                    PAYMENT OPTIONS
+                </span>
+
+                <h2>Where to Send Your Payment</h2>
+
+                <p>
+                    Choose your preferred payment method.
+                </p>
+
+            </div>
+
+            <div class="payment-grid">
+
+                <article class="payment-card">
+
+                    <div class="payment-content">
+
+                        <h3>GCash</h3>
+
+                        <p>GCash Number</p>
+
+                        <span>
+                            0991 818 8995
+                        </span>
+
+                    </div>
+
+                    <a
+                        href="assets/Gcash QR.jpg"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="payment-qr-link"
+                    >
+                        <img
+                            src="assets/Gcash QR.jpg"
+                            alt="GCash QR Code"
+                            class="payment-qr"
+                        >
+                    </a>
+
+                </article>
+
+                <article class="payment-card">
+
+                    <div class="payment-content">
+
+                        <h3>MariBank</h3>
+
+                        <p>Account Name</p>
+
+                        <span>
+                            MYLEN LETCHIDO
+                        </span>
+
+                        <p>Account</p>
+
+                        <span>
+                            MariBank (****1397)
+                        </span>
+
+                    </div>
+
+                    <a
+                        href="assets/MariBank QR.jpg"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="payment-qr-link"
+                    >
+                        <img
+                            src="assets/MariBank QR.jpg"
+                            alt="MariBank QR Code"
+                            class="payment-qr"
+                        >
+                    </a>
+
+                </article>
+
+                <article class="payment-card">
+
+                    <div class="payment-content">
+
+                        <h3>Cash</h3>
+
+                        <p>Payment Location</p>
+
+                        <span>
+                            026 Pulantubig,<br>
+                            Dumaguete City,<br>
+                            Negros Oriental,<br>
+                            Philippines
+                        </span>
+
+                    </div>
+
+                    <div class="cash-symbol">
+                        ₱
+                    </div>
+
+                </article>
+
+            </div>
+
+            <div class="payment-note">
+
+                After sending your payment, submit your payment details
+                and proof of payment through
+
+                <a href="payments.php">
+                    Payments
+                </a>.
+
+            </div>
+
+        </section>
+
+    <?php endif; ?>
 
     <section class="dashboard-cards">
-
-
-        <!-- ACCOUNT -->
 
         <div class="dashboard-card">
 
@@ -653,65 +559,40 @@ $recent_activity = array_map(
                 ◒
             </div>
 
-            <h2>
-                Account
-            </h2>
+            <h2>Account</h2>
 
             <p>
-
                 <strong>Username:</strong>
-
-                <?php
-                echo htmlspecialchars(
+                <?php echo htmlspecialchars(
                     $username,
                     ENT_QUOTES,
                     "UTF-8"
-                );
-                ?>
-
+                ); ?>
             </p>
 
             <p>
-
                 <strong>Name:</strong>
-
-                <?php
-                echo htmlspecialchars(
-                    trim(
-                        "$first_name $last_name"
-                    ),
+                <?php echo htmlspecialchars(
+                    trim("$first_name $last_name"),
                     ENT_QUOTES,
                     "UTF-8"
-                );
-                ?>
-
+                ); ?>
             </p>
 
             <p>
-
                 <strong>Email:</strong>
-
-                <?php
-                echo htmlspecialchars(
+                <?php echo htmlspecialchars(
                     $email,
                     ENT_QUOTES,
                     "UTF-8"
-                );
-                ?>
-
+                ); ?>
             </p>
 
-            <a
-                href="profile.php"
-                class="card-link"
-            >
+            <a href="profile.php" class="card-link">
                 Edit Profile →
             </a>
 
         </div>
-
-
-        <!-- LOAN APPLICATIONS -->
 
         <div class="dashboard-card">
 
@@ -719,62 +600,42 @@ $recent_activity = array_map(
                 ▤
             </div>
 
-            <h2>
-                Loan Applications
-            </h2>
-
+            <h2>Loan Applications</h2>
 
             <?php if (empty($recent_activity)): ?>
 
                 <p class="card-empty">
-                    You haven't submitted any
-                    applications yet.
+                    You haven't submitted any applications yet.
                 </p>
 
             <?php else: ?>
 
                 <ul class="activity-list">
 
-                    <?php foreach (
-                        $recent_activity
-                        as $item
-                    ): ?>
+                    <?php foreach ($recent_activity as $item): ?>
 
                         <li>
 
                             <span>
-
-                                <?php
-                                echo htmlspecialchars(
+                                <?php echo htmlspecialchars(
                                     $item["title"],
                                     ENT_QUOTES,
                                     "UTF-8"
-                                );
-                                ?>
-
+                                ); ?>
                             </span>
 
-
                             <span
-                                class="status-badge status-<?php
-                                echo htmlspecialchars(
+                                class="status-badge status-<?php echo htmlspecialchars(
                                     $item["status"],
                                     ENT_QUOTES,
                                     "UTF-8"
-                                );
-                                ?>"
+                                ); ?>"
                             >
-
-                                <?php
-                                echo htmlspecialchars(
-                                    ucfirst(
-                                        $item["status"]
-                                    ),
+                                <?php echo htmlspecialchars(
+                                    ucfirst($item["status"]),
                                     ENT_QUOTES,
                                     "UTF-8"
-                                );
-                                ?>
-
+                                ); ?>
                             </span>
 
                         </li>
@@ -785,18 +646,11 @@ $recent_activity = array_map(
 
             <?php endif; ?>
 
-
-            <a
-                href="applications.php"
-                class="card-link"
-            >
+            <a href="applications.php" class="card-link">
                 View Applications →
             </a>
 
         </div>
-
-
-        <!-- APPLY FOR LOAN -->
 
         <div class="dashboard-card dashboard-card-highlight">
 
@@ -804,9 +658,7 @@ $recent_activity = array_map(
                 ✦
             </div>
 
-            <h2>
-                Apply for a Loan
-            </h2>
+            <h2>Apply for a Loan</h2>
 
             <p>
                 Ready to take the next step?
@@ -821,7 +673,6 @@ $recent_activity = array_map(
             </a>
 
         </div>
-
 
     </section>
 

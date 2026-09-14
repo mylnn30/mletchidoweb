@@ -48,7 +48,6 @@ select {
     font: inherit;
 }
 
-
 /* ==========================================================================
    TOPBAR
    ========================================================================== */
@@ -126,7 +125,6 @@ select {
     background: var(--blue-500);
 }
 
-
 /* ==========================================================================
    PAGE SHELL
    ========================================================================== */
@@ -149,7 +147,6 @@ select {
         transform: translateY(0);
     }
 }
-
 
 /* ==========================================================================
    WELCOME
@@ -200,7 +197,6 @@ select {
     transform: translateY(-2px);
     box-shadow: 0 12px 30px rgba(59, 111, 237, 0.25);
 }
-
 
 /* ==========================================================================
    STATS
@@ -253,7 +249,6 @@ select {
     color: var(--text-lo);
     font-size: 12px;
 }
-
 
 /* ==========================================================================
    GENERAL CARDS
@@ -344,6 +339,129 @@ select {
 
 
 /* ==========================================================================
+   PAYMENT FORM
+   ========================================================================== */
+
+.dashboard-card form {
+    width: 100%;
+    margin-top: 5px;
+}
+
+.dashboard-card form > p {
+    margin: 0 0 20px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--navy-800);
+    color: var(--text-lo);
+    font-size: 13px;
+}
+
+.dashboard-card form > p strong {
+    color: var(--text-hi);
+    font-weight: 600;
+}
+
+.form-group {
+    width: 100%;
+    margin-bottom: 17px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--text-hi);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    min-height: 43px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    outline: none;
+    background: var(--navy-800);
+    color: var(--text-hi);
+    font-size: 13px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #68738b;
+}
+
+.form-group input:hover,
+.form-group select:hover,
+.form-group textarea:hover {
+    border-color: #34446d;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--blue-400);
+    background: var(--navy-800);
+    box-shadow: 0 0 0 3px rgba(59, 111, 237, 0.12);
+}
+
+.form-group select {
+    cursor: pointer;
+    appearance: auto;
+}
+
+.form-group input[type="date"] {
+    color-scheme: dark;
+}
+
+.field-error {
+    margin: 6px 0 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: var(--red-400) !important;
+    font-size: 11px !important;
+    line-height: 1.4;
+}
+
+.dashboard-card form .welcome-cta {
+    width: 100%;
+    margin-top: 5px;
+    border: 1px solid var(--blue-500);
+    cursor: pointer;
+}
+
+.dashboard-card form .welcome-cta:hover {
+    background: var(--blue-400);
+}
+
+/* PAYMENT FORM RESPONSIVE */
+
+@media (max-width: 600px) {
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        font-size: 11px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        min-height: 42px;
+        padding: 9px 11px;
+        font-size: 12px;
+    }
+
+}
+
+/* ==========================================================================
    NOTIFICATIONS
    ========================================================================== */
 
@@ -354,7 +472,6 @@ select {
 .notification-card h2 {
     margin-bottom: 15px;
 }
-
 
 /* ==========================================================================
    ACTIVITY / STATUS
@@ -412,7 +529,6 @@ select {
     color: var(--red-400);
 }
 
-
 /* ==========================================================================
    LOAN REPAYMENT SECTION
    ========================================================================== */
@@ -450,7 +566,6 @@ select {
     color: var(--text-lo);
     font-size: 13px;
 }
-
 
 /* ==========================================================================
    LOAN PAYMENT CARD
@@ -520,7 +635,6 @@ select {
     font-weight: 700;
 }
 
-
 /* ==========================================================================
    LOAN STATUS
    ========================================================================== */
@@ -555,7 +669,6 @@ select {
     background: currentColor;
 }
 
-
 /* ==========================================================================
    BALANCE
    ========================================================================== */
@@ -581,7 +694,6 @@ select {
     line-height: 1.2;
     letter-spacing: -1px;
 }
-
 
 /* ==========================================================================
    PAYMENT PROGRESS
@@ -640,7 +752,6 @@ select {
     font-size: 10px;
 }
 
-
 /* ==========================================================================
    LOAN DETAILS
    ========================================================================== */
@@ -698,7 +809,6 @@ select {
     color: var(--red-400) !important;
 }
 
-
 /* ==========================================================================
    PAYMENT FOOTER
    ========================================================================== */
@@ -752,6 +862,164 @@ select {
     transform: translateY(-1px);
 }
 
+/* ==========================================================================
+   PAYMENT DESTINATIONS
+   ========================================================================== */
+
+.payment-destinations {
+    margin: 35px 0;
+    padding: 25px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--navy-900);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18);
+}
+
+.payment-header {
+    margin-bottom: 18px;
+}
+
+.payment-eyebrow {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--blue-400);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.payment-header h2 {
+    margin: 0 0 5px;
+    color: var(--text-hi);
+    font-size: 21px;
+    line-height: 1.3;
+}
+
+.payment-header p {
+    margin: 0;
+    color: var(--text-lo);
+    font-size: 13px;
+}
+
+.payment-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.payment-card {
+    min-width: 0;
+    min-height: 165px;
+    padding: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--navy-800);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.payment-card:hover {
+    border-color: rgba(95, 139, 245, 0.45);
+    transform: translateY(-2px);
+}
+
+.payment-content {
+    min-width: 0;
+    flex: 1;
+}
+
+.payment-content h3 {
+    margin: 0 0 12px;
+    color: var(--text-hi);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.payment-content p {
+    margin: 7px 0 2px;
+    color: var(--text-lo);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.payment-content span {
+    display: block;
+    color: #dce2ef;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+/* QR IMAGE SIZE */
+
+.payment-qr-link {
+    flex: 0 0 95px;
+    width: 95px;
+    height: 95px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.payment-qr {
+    display: block;
+    width: 80px !important;
+    height: 80px !important;
+    max-width: 80px !important;
+    max-height: 80px !important;
+    padding: 3px;
+    object-fit: contain;
+    object-position: center;
+    background: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.payment-qr:hover {
+    border-color: var(--blue-400);
+    transform: scale(1.04);
+}
+
+.cash-symbol {
+    flex: 0 0 52px;
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(95, 139, 245, 0.25);
+    border-radius: 9px;
+    background: rgba(59, 111, 237, 0.1);
+    color: var(--blue-400);
+    font-size: 24px;
+    font-weight: 750;
+}
+
+.payment-note {
+    margin-top: 14px;
+    padding: 11px 14px;
+    border: 1px solid rgba(59, 111, 237, 0.2);
+    border-radius: 8px;
+    background: rgba(59, 111, 237, 0.07);
+    color: var(--text-lo);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.payment-note a {
+    color: var(--blue-400);
+    font-weight: 650;
+}
+
+.payment-note a:hover {
+    color: #ffffff;
+}
 
 /* ==========================================================================
    TABLET
@@ -784,8 +1052,14 @@ select {
         grid-column: span 2;
     }
 
-}
+    .payment-grid {
+        grid-template-columns: 1fr;
+    }
 
+    .payment-card {
+        min-height: 140px;
+    }
+}
 
 /* ==========================================================================
    TABLET / SMALL LAPTOP
@@ -828,9 +1102,7 @@ select {
     .loan-details {
         grid-template-columns: repeat(2, 1fr);
     }
-
 }
-
 
 /* ==========================================================================
    MOBILE
@@ -892,8 +1164,28 @@ select {
         width: 100%;
     }
 
-}
+    .payment-destinations {
+        padding: 20px;
+    }
 
+    .payment-card {
+        min-height: 135px;
+        padding: 15px;
+    }
+
+    .payment-qr-link {
+        flex: 0 0 82px;
+        width: 82px;
+        height: 82px;
+    }
+
+    .payment-qr {
+        width: 70px !important;
+        height: 70px !important;
+        max-width: 70px !important;
+        max-height: 70px !important;
+    }
+}
 
 /* ==========================================================================
    SMALL MOBILE
@@ -938,9 +1230,7 @@ select {
     .progress-amounts {
         font-size: 9px;
     }
-
 }
-
 
 /* ==========================================================================
    VERY SMALL MOBILE
@@ -980,8 +1270,27 @@ select {
         font-size: 10px;
     }
 
-}
+    .payment-destinations {
+        padding: 17px;
+    }
 
+    .payment-card {
+        gap: 10px;
+    }
+
+    .payment-qr-link {
+        flex: 0 0 75px;
+        width: 75px;
+        height: 75px;
+    }
+
+    .payment-qr {
+        width: 65px !important;
+        height: 65px !important;
+        max-width: 65px !important;
+        max-height: 65px !important;
+    }
+}
 
 /* ==========================================================================
    ACCESSIBILITY
@@ -1009,5 +1318,4 @@ select:focus-visible {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
-
 }
