@@ -222,14 +222,57 @@ function update_loan_application_status($application_id, $new_status) {
         return "Invalid status.";
     }
 
-    $sql = "UPDATE `loan_applications` SET status = ? WHERE id = ?";
-    $stmt = mysqli_prepare($conn, $sql);
+    $current = get_loan_application_by_id_admin($application_id);
+    if (!$current) {
+        return "Loan application not found.";
+    }
+
+    if ($current["status"] === $new_status) {
+        return true;
+    }
+
+    if ($new_status === "approved") {
+        $loan = get_loan_application_by_id_admin($application_id);
+        if (!$loan) {
+            return "Loan application not found.";
+        }
+
+        $interest_rate = $loan["interest_rate"];
+        if ($interest_rate === null) {
+            $settings = get_system_settings();
+            $interest_rate = isset($settings["default_interest_rate"])
+    ? (float) $settings["default_interest_rate"]
+    : 4.99;
+        }
+
+        $payment_frequency = $loan["payment_frequency"];
+        if (!in_array($payment_frequency, ["weekly", "biweekly", "monthly"], true)) {
+            $payment_frequency = "monthly";
+        }
+
+        $due_date = $loan["next_due_date"];
+        if (!$due_date) {
+            $due_date = calculate_first_due_date(date("Y-m-d"), $payment_frequency);
+        }
+
+        $sql = "UPDATE `loan_applications`
+                SET status = ?, interest_rate = ?, payment_frequency = ?, next_due_date = ?
+                WHERE id = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+    } else {
+        $sql = "UPDATE `loan_applications` SET status = ? WHERE id = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+    }
 
     if (!$stmt) {
         return "Something went wrong. Please try again.";
     }
 
-    mysqli_stmt_bind_param($stmt, "si", $new_status, $application_id);
+    if ($new_status === "approved") {
+        mysqli_stmt_bind_param($stmt, "sdssi", $new_status, $interest_rate, $payment_frequency, $due_date, $application_id);
+    } else {
+        mysqli_stmt_bind_param($stmt, "si", $new_status, $application_id);
+    }
 
     if (mysqli_stmt_execute($stmt)) {
         mysqli_stmt_close($stmt);
@@ -351,6 +394,44 @@ function set_user_active_status($target_user_id, $acting_user_id, $is_active) {
  * remaining balance computed from confirmed payments rather than
  * stored, so it's always accurate.
  */
+function calculate_loan_total_payable($amount, $interest_rate) {
+    $amount = max(0, (float) $amount);
+    $interest_rate = max(0, (float) $interest_rate);
+    return round($amount + ($amount * $interest_rate / 100), 2);
+}
+
+function get_installment_count($term_months, $payment_frequency) {
+    $term_months = max(1, (int) $term_months);
+
+    if ($payment_frequency === "weekly") {
+        return $term_months * 4;
+    }
+
+    if ($payment_frequency === "biweekly") {
+        return $term_months * 2;
+    }
+
+    return $term_months;
+}
+
+function get_installment_amount($amount, $interest_rate, $term_months, $payment_frequency) {
+    $count = get_installment_count($term_months, $payment_frequency);
+    return $count > 0
+        ? round(calculate_loan_total_payable($amount, $interest_rate) / $count, 2)
+        : 0.00;
+}
+
+function calculate_first_due_date($start_date, $payment_frequency) {
+    $interval_map = [
+        "weekly" => "+7 days",
+        "biweekly" => "+14 days",
+        "monthly" => "+1 month"
+    ];
+
+    $interval = $interval_map[$payment_frequency] ?? "+1 month";
+    return date("Y-m-d", strtotime($start_date . " " . $interval));
+}
+
 function get_active_loans() {
     global $conn;
 
@@ -372,10 +453,30 @@ function get_active_loans() {
     $loans = $result ? mysqli_fetch_all($result, MYSQLI_ASSOC) : [];
 
     foreach ($loans as &$loan) {
-        $loan["remaining_balance"] = (float) $loan["amount"] - (float) $loan["total_paid"];
+        $rate = $loan["interest_rate"] !== null ? (float) $loan["interest_rate"] : 0;
+        $loan["total_payable"] = calculate_loan_total_payable($loan["amount"], $rate);
+        $loan["installment_count"] = get_installment_count($loan["term_months"], $loan["payment_frequency"]);
+        $loan["installment_amount"] = get_installment_amount(
+            $loan["amount"],
+            $rate,
+            $loan["term_months"],
+            $loan["payment_frequency"]
+        );
+        $loan["remaining_balance"] = max(
+            0,
+            round($loan["total_payable"] - (float) $loan["total_paid"], 2)
+        );
     }
 
     return $loans;
+}
+
+function get_user_active_loans($user_id) {
+    $loans = get_active_loans();
+
+    return array_values(array_filter($loans, function ($loan) use ($user_id) {
+        return (int) $loan["user_id"] === (int) $user_id;
+    }));
 }
 
 
@@ -467,8 +568,87 @@ function get_payment_statuses() {
  * frequency), so "next due date" always reflects what's actually
  * still owed going forward.
  */
+function get_loan_by_id_for_payment($loan_id) {
+    global $conn;
+
+    $sql = "SELECT id, user_id, amount, term_months, interest_rate,
+                   payment_frequency, next_due_date, status
+            FROM `loan_applications`
+            WHERE id = ? LIMIT 1";
+
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        return null;
+    }
+
+    mysqli_stmt_bind_param($stmt, "i", $loan_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $loan = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+
+    return $loan ?: null;
+}
+
+function get_loan_remaining_balance($loan_id) {
+    $loan = get_loan_by_id_for_payment($loan_id);
+
+    if (!$loan) {
+        return 0.00;
+    }
+
+    global $conn;
+    $sql = "SELECT COALESCE(SUM(amount_paid), 0) AS total_paid
+            FROM payments
+            WHERE loan_id = ? AND status = 'confirmed'";
+
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        return 0.00;
+    }
+
+    mysqli_stmt_bind_param($stmt, "i", $loan_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+
+    $rate = $loan["interest_rate"] !== null ? (float) $loan["interest_rate"] : 0;
+    $total_payable = calculate_loan_total_payable($loan["amount"], $rate);
+    $total_paid = (float) ($row["total_paid"] ?? 0);
+
+    return max(0, round($total_payable - $total_paid, 2));
+}
+
 function record_payment($loan_id, $payment_date, $amount_paid, $payment_method, $reference_number, $status) {
     global $conn;
+
+    if ($loan_id <= 0 || $amount_paid == 0) {
+        return "Invalid payment.";
+    }
+
+    $allowed_methods = array_keys(get_payment_methods());
+    $allowed_statuses = array_keys(get_payment_statuses());
+
+    if (!in_array($payment_method, $allowed_methods, true)) {
+        return "Invalid payment method.";
+    }
+
+    if (!in_array($status, $allowed_statuses, true)) {
+        return "Invalid payment status.";
+    }
+
+    $loan = get_loan_by_id_for_payment($loan_id);
+    if (!$loan || $loan["status"] !== "approved") {
+        return "The selected loan is not an active approved loan.";
+    }
+
+    if ($amount_paid > 0) {
+        $remaining = get_loan_remaining_balance($loan_id);
+        if ($amount_paid > $remaining) {
+            return "Payment cannot be greater than the remaining balance of ₱" . number_format($remaining, 2) . ".";
+        }
+    }
 
     $sql = "INSERT INTO `payments`
                 (loan_id, payment_date, amount_paid, payment_method, reference_number, status)
@@ -495,9 +675,10 @@ function record_payment($loan_id, $payment_date, $amount_paid, $payment_method, 
         return "Could not record this payment. Please try again.";
     }
 
+    $payment_id = mysqli_insert_id($conn);
     mysqli_stmt_close($stmt);
 
-    if ($status === "confirmed") {
+    if ($status === "confirmed" && $amount_paid > 0) {
         advance_next_due_date($loan_id);
     }
 
@@ -552,7 +733,13 @@ function advance_next_due_date($loan_id) {
  * needing a separate "penalty" column anywhere.
  */
 function apply_late_penalty($loan_id, $penalty_amount) {
-    return record_payment(
+    $loan = get_loan_by_id_for_payment($loan_id);
+
+    if (!$loan || $loan["status"] !== "approved") {
+        return "The selected loan is not active.";
+    }
+
+    $result = record_payment(
         $loan_id,
         date("Y-m-d"),
         -abs($penalty_amount),
@@ -560,6 +747,16 @@ function apply_late_penalty($loan_id, $penalty_amount) {
         "Late payment penalty",
         "confirmed"
     );
+
+    if ($result === true) {
+        create_notification(
+            (int) $loan["user_id"],
+            "A late fee of ₱" . number_format(abs($penalty_amount), 2) . " was added to your " . $loan["loan_type"] . " loan.",
+            "late_fee"
+        );
+    }
+
+    return $result;
 }
 
 
@@ -571,21 +768,87 @@ function update_payment_status($payment_id, $new_status) {
         return "Invalid payment status.";
     }
 
-    $sql = "UPDATE `payments` SET status = ? WHERE id = ?";
-    $stmt = mysqli_prepare($conn, $sql);
-    if (!$stmt) {
-        return "Something went wrong. Please try again.";
-    }
+    mysqli_begin_transaction($conn);
 
-    mysqli_stmt_bind_param($stmt, "si", $new_status, $payment_id);
+    try {
+        $sql = "SELECT p.id, p.loan_id, p.amount_paid, p.status,
+                       la.user_id, la.loan_type
+                FROM payments p
+                INNER JOIN loan_applications la ON la.id = p.loan_id
+                WHERE p.id = ?
+                LIMIT 1
+                FOR UPDATE";
 
-    if (mysqli_stmt_execute($stmt)) {
+        $stmt = mysqli_prepare($conn, $sql);
+        if (!$stmt) {
+            throw new Exception("Something went wrong. Please try again.");
+        }
+
+        mysqli_stmt_bind_param($stmt, "i", $payment_id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $payment = mysqli_fetch_assoc($result);
         mysqli_stmt_close($stmt);
-        return true;
-    }
 
-    mysqli_stmt_close($stmt);
-    return "Could not update this payment. Please try again.";
+        if (!$payment) {
+            throw new Exception("Payment not found.");
+        }
+
+        $old_status = $payment["status"];
+
+        if ($old_status === "confirmed" && $new_status !== "confirmed") {
+            throw new Exception("A confirmed payment cannot be changed.");
+        }
+
+        if ($old_status === $new_status) {
+            mysqli_commit($conn);
+            return true;
+        }
+
+        if ($new_status === "confirmed") {
+            $remaining = get_loan_remaining_balance((int) $payment["loan_id"]);
+            if ((float) $payment["amount_paid"] > $remaining) {
+                throw new Exception("This payment is greater than the remaining loan balance.");
+            }
+        }
+
+        $update_sql = "UPDATE `payments` SET status = ? WHERE id = ?";
+        $update_stmt = mysqli_prepare($conn, $update_sql);
+        if (!$update_stmt) {
+            throw new Exception("Could not update the payment.");
+        }
+
+        mysqli_stmt_bind_param($update_stmt, "si", $new_status, $payment_id);
+
+        if (!mysqli_stmt_execute($update_stmt)) {
+            mysqli_stmt_close($update_stmt);
+            throw new Exception("Could not update this payment.");
+        }
+
+        mysqli_stmt_close($update_stmt);
+
+        if ($old_status === "pending" && $new_status === "confirmed") {
+            advance_next_due_date((int) $payment["loan_id"]);
+
+            create_notification(
+                (int) $payment["user_id"],
+                "Your payment of ₱" . number_format((float) $payment["amount_paid"], 2) . " for your " . $payment["loan_type"] . " loan has been confirmed.",
+                "payment_confirmed"
+            );
+        } elseif ($old_status === "pending" && $new_status === "failed") {
+            create_notification(
+                (int) $payment["user_id"],
+                "Your payment of ₱" . number_format((float) $payment["amount_paid"], 2) . " for your " . $payment["loan_type"] . " loan was rejected.",
+                "payment_rejected"
+            );
+        }
+
+        mysqli_commit($conn);
+        return true;
+    } catch (Exception $e) {
+        mysqli_rollback($conn);
+        return $e->getMessage();
+    }
 }
 
 

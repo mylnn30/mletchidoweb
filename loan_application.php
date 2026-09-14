@@ -365,18 +365,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                         <div class="form-row">
                             <div class="form-group form-full">
-                                <label for="occupation">Occupation / Job Title (or Course, if student)<span class="required-mark">*</span></label>
+                                <label for="occupation">Occupation / Job Title<span class="required-mark">*</span></label>
                                 <input
                                     type="text"
                                     id="occupation"
                                     name="occupation"
-                                    placeholder="e.g. Nurse, BS Accountancy, Sari-sari store owner"
+                                    placeholder="e.g. Nurse, Sari-sari store owner"
                                     value="<?php echo htmlspecialchars($_POST["occupation"] ?? "", ENT_QUOTES, "UTF-8"); ?>"
                                     class="<?php echo isset($errors["occupation"]) ? "input-error" : ""; ?>"
                                     required
                                 >
                                 <?php if (isset($errors["occupation"])): ?>
-                                    <p class="field-error"><?php echo htmlspecialchars($errors["occupation"], ENT_QUOTES, "UTF-8"); ?></p>
+                                    <p class="fiel  d-error"><?php echo htmlspecialchars($errors["occupation"], ENT_QUOTES, "UTF-8"); ?></p>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -402,12 +402,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 <div class="form-group">
                                     <label for="employer_contact_number">Employer Contact Number<span class="required-mark">*</span></label>
                                     <input
-                                        type="tel"
-                                        id="employer_contact_number"
-                                        name="employer_contact_number"
-                                        placeholder="e.g. 09171234567"
-                                        value="<?php echo htmlspecialchars($_POST["employer_contact_number"] ?? "", ENT_QUOTES, "UTF-8"); ?>"
-                                        class="<?php echo isset($errors["employer_contact_number"]) ? "input-error" : ""; ?>"
+                                            type="tel"
+                                            id="employer_contact_number"
+                                            name="employer_contact_number"
+                                            placeholder="e.g. 09171234567"
+                                            value="<?php echo htmlspecialchars($_POST["employer_contact_number"] ?? "", ENT_QUOTES, "UTF-8"); ?>"
+                                            class="<?php echo isset($errors["employer_contact_number"]) ? "input-error" : ""; ?>"
+                                            inputmode="numeric"
+                                            pattern="[0-9]{11}"
+                                            minlength="11"
+                                            maxlength="11"
                                     >
                                     <?php if (isset($errors["employer_contact_number"])): ?>
                                         <p class="field-error"><?php echo htmlspecialchars($errors["employer_contact_number"], ENT_QUOTES, "UTF-8"); ?></p>

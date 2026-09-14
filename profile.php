@@ -33,11 +33,13 @@ $updated = isset($_GET["updated"]) && $_GET["updated"] === "1";
         Mletchido Financial Group
     </div>
     <nav class="topbar-nav">
-        <a href="dashboard.php">Dashboard</a>
-        <a href="applications.php">My Applications</a>
-        <a href="profile.php" class="is-active">Profile</a>
-        <a href="logout.php">Sign Out</a>
-    </nav>
+    <a href="dashboard.php">Dashboard</a>
+    <a href="applications.php">My Applications</a>
+    <a href="payments.php">Payments</a>
+    <a href="notifications.php">Notifications</a>
+    <a href="profile.php" class="is-active">Profile</a>
+    <a href="logout.php">Sign Out</a>
+</nav>
 </header>
 
 <main class="profile-page">

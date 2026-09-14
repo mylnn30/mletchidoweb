@@ -43,9 +43,9 @@ function submit_loan_application(
     $business_name,
     $business_type,
     $monthly_income,
+    $payment_frequency,
     $amount,
     $term,
-    $payment_frequency,
     $purpose,
     $valid_id_file,
     $proof_of_income_file,
@@ -53,6 +53,18 @@ function submit_loan_application(
     $employment_certificate_file
 ) {
     global $conn;
+
+    if (!in_array($payment_frequency, ["weekly", "biweekly", "monthly"], true)) {
+        return "Invalid payment frequency.";
+    }
+
+    if ((float) $amount < 5000 || (float) $amount > 50000000) {
+        return "Loan amount must be between ₱5,000 and ₱50,000,000.";
+    }
+
+    if ((int) $term <= 0) {
+        return "Invalid repayment term.";
+    }
 
     $valid_id_path = save_uploaded_document($valid_id_file, $user_id, "valid_id");
     if ($valid_id_path === null) {
@@ -193,4 +205,52 @@ function get_user_loan_applications($user_id) {
     mysqli_stmt_close($stmt);
 
     return $applications;
+}
+
+function get_user_loan_details($loan_id, $user_id) {
+    global $conn;
+
+    $sql = "SELECT id, user_id, loan_type, amount, term_months,
+                   payment_frequency, interest_rate, next_due_date, status,
+                   submitted_at
+            FROM `loan_applications`
+            WHERE id = ? AND user_id = ? AND status = 'approved'
+            LIMIT 1";
+
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        return null;
+    }
+
+    mysqli_stmt_bind_param($stmt, "ii", $loan_id, $user_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $loan = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+
+    return $loan ?: null;
+}
+
+function get_user_payments($loan_id, $user_id) {
+    global $conn;
+
+    $sql = "SELECT p.id, p.payment_date, p.amount_paid, p.payment_method,
+                   p.reference_number, p.status, p.recorded_at
+            FROM payments p
+            INNER JOIN loan_applications la ON la.id = p.loan_id
+            WHERE p.loan_id = ? AND la.user_id = ?
+            ORDER BY p.payment_date DESC, p.id DESC";
+
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        return [];
+    }
+
+    mysqli_stmt_bind_param($stmt, "ii", $loan_id, $user_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $payments = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    mysqli_stmt_close($stmt);
+
+    return $payments;
 }

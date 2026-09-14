@@ -1,37 +1,31 @@
 <?php
 
 /**
- * The four loan types, each with a realistic, fixed list of
- * repayment terms (in months) instead of a free-typed number.
- * These match the general term ranges shown on the homepage,
- * but broken into sensible steps a lender would actually offer.
- * Reused by the form dropdown AND validation, so both always agree.
+ * Loan types and allowed repayment terms.
  */
 function get_loan_types() {
     return [
         "home" => [
             "label" => "Home Loan",
-            "terms" => [60, 120, 180, 240, 300, 360], // 5, 10, 15, 20, 25, 30 yrs
+            "terms" => [60, 120, 180, 240, 300, 360]
         ],
         "business" => [
             "label" => "Business Loan",
-            "terms" => [12, 24, 36, 48, 60, 72, 84], // 1–7 yrs
+            "terms" => [12, 24, 36, 48, 60, 72, 84]
         ],
         "personal" => [
             "label" => "Personal Loan",
-            "terms" => [12, 18, 24, 36, 48, 60], // 1–5 yrs (with a 1.5 yr step)
+            "terms" => [12, 18, 24, 36, 48, 60]
         ],
         "asset_backed" => [
             "label" => "Asset-Backed Loan",
-            "terms" => [24, 36, 48, 60, 72, 84, 96, 108, 120], // 2–10 yrs
-        ],
+            "terms" => [24, 36, 48, 60, 72, 84, 96, 108, 120]
+        ]
     ];
 }
 
 /**
- * Government-issued ID types accepted for the "Valid ID" upload.
- * Shown as a dropdown so applicants pick from a fixed list instead
- * of typing a free-text value that would be hard to standardize.
+ * Accepted ID types.
  */
 function get_id_types() {
     return [
@@ -43,23 +37,22 @@ function get_id_types() {
         "postal_id" => "Postal ID",
         "voters_id" => "Voter's ID",
         "philsys_id" => "National ID (PhilSys)",
-        "tin_id" => "TIN ID",
+        "tin_id" => "TIN ID"
     ];
 }
 
 /**
- * Employment status options for the applicant.
+ * Employment status options.
  */
 function get_employment_statuses() {
     return [
         "employed" => "Employed",
-        "self_employed" => "Self-Employed",
+        "self_employed" => "Self-Employed"
     ];
 }
 
 /**
- * How long the applicant has held their current job. Only relevant
- * (and required) when Employment Status = Employed.
+ * Employment length options.
  */
 function get_employment_lengths() {
     return [
@@ -67,12 +60,12 @@ function get_employment_lengths() {
         "1_to_2_years" => "1–2 years",
         "3_to_5_years" => "3–5 years",
         "6_to_10_years" => "6–10 years",
-        "more_than_10_years" => "More than 10 years",
+        "more_than_10_years" => "More than 10 years"
     ];
 }
 
 /**
- * Business categories for self-employed applicants.
+ * Business type options.
  */
 function get_business_types() {
     return [
@@ -81,23 +74,24 @@ function get_business_types() {
         "food_and_beverage" => "Food & Beverage",
         "services" => "Services (e.g. repair, salon, tutoring)",
         "online_business" => "Online Business / E-commerce",
-        "other" => "Other",
+        "other" => "Other"
     ];
 }
 
 /**
- * How the applicant would prefer to pay their loan back, used later
- * to schedule due dates once a loan is approved.
+ * Payment frequency options.
  */
 function get_payment_frequencies() {
     return [
         "monthly" => "Monthly",
         "biweekly" => "Bi-weekly",
-        "weekly" => "Weekly",
+        "weekly" => "Weekly"
     ];
 }
 
-
+/**
+ * Main loan application validation.
+ */
 function validate_loan_application(
     $loan_type,
     $id_type,
@@ -115,12 +109,33 @@ function validate_loan_application(
     $business_type
 ) {
     $errors = [];
+
     $loan_types = get_loan_types();
     $id_types = get_id_types();
     $employment_statuses = get_employment_statuses();
     $employment_lengths = get_employment_lengths();
     $business_types = get_business_types();
     $payment_frequencies = get_payment_frequencies();
+
+    /*
+     * TRIM ALL TEXT VALUES.
+     * This prevents values such as "     " from passing validation.
+     */
+
+    $loan_type = trim((string) $loan_type);
+    $id_type = trim((string) $id_type);
+    $employment_status = trim((string) $employment_status);
+    $occupation = trim((string) $occupation);
+    $monthly_income = trim((string) $monthly_income);
+    $amount = trim((string) $amount);
+    $term = trim((string) $term);
+    $purpose = trim((string) $purpose);
+    $payment_frequency = trim((string) $payment_frequency);
+    $employer_name = trim((string) $employer_name);
+    $length_of_employment = trim((string) $length_of_employment);
+    $employer_contact_number = trim((string) $employer_contact_number);
+    $business_name = trim((string) $business_name);
+    $business_type = trim((string) $business_type);
 
     /* LOAN TYPE */
 
@@ -146,17 +161,80 @@ function validate_loan_application(
         $errors["employment_status"] = "Please select a valid employment status.";
     }
 
-    /* OCCUPATION / JOB TITLE */
+    /* OCCUPATION */
 
     if ($occupation === "") {
-        $errors["occupation"] = "Please tell us your occupation (or course, if a student).";
+        $errors["occupation"] = "Occupation is required.";
     } elseif (strlen($occupation) > 100) {
         $errors["occupation"] = "Occupation cannot be more than 100 characters.";
     }
 
-    /* EMPLOYED-ONLY FIELDS */
+    /* MONTHLY INCOME */
+
+    if ($monthly_income === "") {
+        $errors["monthly_income"] = "Monthly income is required.";
+    } elseif (!is_numeric($monthly_income)) {
+        $errors["monthly_income"] = "Please enter a valid amount.";
+    } elseif (!is_finite((float) $monthly_income)) {
+        $errors["monthly_income"] = "Please enter a valid amount.";
+    } elseif ((float) $monthly_income <= 0) {
+        $errors["monthly_income"] = "Monthly income must be greater than 0.";
+    } elseif ((float) $monthly_income > 10000000) {
+        $errors["monthly_income"] = "Please enter a realistic monthly income.";
+    }
+
+    /* PAYMENT FREQUENCY */
+
+    if ($payment_frequency === "") {
+        $errors["payment_frequency"] = "Please select your preferred payment frequency.";
+    } elseif (!isset($payment_frequencies[$payment_frequency])) {
+        $errors["payment_frequency"] = "Please select a valid payment frequency.";
+    }
+
+    /* LOAN AMOUNT */
+
+    if ($amount === "") {
+        $errors["amount"] = "Loan amount is required.";
+    } elseif (!is_numeric($amount)) {
+        $errors["amount"] = "Please enter a valid loan amount.";
+    } elseif (!is_finite((float) $amount)) {
+        $errors["amount"] = "Please enter a valid loan amount.";
+    } elseif ((float) $amount <= 0) {
+        $errors["amount"] = "Loan amount must be greater than 0.";
+    } elseif ((float) $amount < 5000) {
+        $errors["amount"] = "Loan amount must be at least ₱5,000.";
+    } elseif ((float) $amount > 50000000) {
+        $errors["amount"] = "Loan amount cannot exceed ₱50,000,000.";
+    }
+
+    /* REPAYMENT TERM */
+
+    if ($term === "") {
+        $errors["term"] = "Please select a repayment term.";
+    } elseif (!ctype_digit($term)) {
+        $errors["term"] = "Please select a valid repayment term.";
+    } elseif (!isset($loan_types[$loan_type])) {
+        $errors["term"] = "Please select a valid loan type first.";
+    } else {
+        $allowed_terms = $loan_types[$loan_type]["terms"];
+
+        if (!in_array((int) $term, $allowed_terms, true)) {
+            $errors["term"] = "Please select one of the available terms for your loan.";
+        }
+    }
+
+    /* PURPOSE */
+
+    if ($purpose === "") {
+        $errors["purpose"] = "Loan purpose is required.";
+    } elseif (strlen($purpose) > 500) {
+        $errors["purpose"] = "Purpose cannot be more than 500 characters.";
+    }
+
+    /* EMPLOYED FIELDS */
 
     if ($employment_status === "employed") {
+
         if ($employer_name === "") {
             $errors["employer_name"] = "Employer / company name is required.";
         } elseif (strlen($employer_name) > 150) {
@@ -178,9 +256,10 @@ function validate_loan_application(
         }
     }
 
-    /* SELF-EMPLOYED-ONLY FIELDS */
+    /* SELF-EMPLOYED FIELDS */
 
     if ($employment_status === "self_employed") {
+
         if ($business_name === "") {
             $errors["business_name"] = "Business name is required.";
         } elseif (strlen($business_name) > 150) {
@@ -194,107 +273,123 @@ function validate_loan_application(
         }
     }
 
-    /* MONTHLY INCOME (labeled "Estimated Monthly Income" for self-employed) */
-
-    if ($monthly_income === "" || $monthly_income === null) {
-        $errors["monthly_income"] = "Monthly income is required.";
-    } elseif (!is_numeric($monthly_income)) {
-        $errors["monthly_income"] = "Please enter a valid amount.";
-    } elseif ((float) $monthly_income < 0) {
-        $errors["monthly_income"] = "Monthly income cannot be negative.";
-    } elseif ((float) $monthly_income > 10000000) {
-        $errors["monthly_income"] = "Please enter a realistic monthly income.";
-    }
-
-    /* PREFERRED PAYMENT FREQUENCY */
-
-    if ($payment_frequency === "") {
-        $errors["payment_frequency"] = "Please select your preferred payment frequency.";
-    } elseif (!isset($payment_frequencies[$payment_frequency])) {
-        $errors["payment_frequency"] = "Please select a valid payment frequency.";
-    }
-
-    /* AMOUNT */
-
-    if ($amount === "" || $amount === null) {
-        $errors["amount"] = "Loan amount is required.";
-    } elseif (!is_numeric($amount)) {
-        $errors["amount"] = "Please enter a valid amount.";
-    } elseif ((float) $amount < 5000) {
-        $errors["amount"] = "Loan amount must be at least ₱5,000.";
-    } elseif ((float) $amount > 50000000) {
-        $errors["amount"] = "Loan amount cannot exceed ₱50,000,000.";
-    }
-
-    /* TERM — must be one of the fixed options for the chosen loan type */
-
-    if ($term === "" || $term === null) {
-        $errors["term"] = "Please select a repayment term.";
-    } elseif (!ctype_digit((string) $term)) {
-        $errors["term"] = "Please select a valid repayment term.";
-    } elseif (isset($loan_types[$loan_type])) {
-        $allowed_terms = $loan_types[$loan_type]["terms"];
-
-        if (!in_array((int) $term, $allowed_terms, true)) {
-            $errors["term"] = "Please select one of the available terms for a "
-                . $loan_types[$loan_type]["label"] . ".";
-        }
-    }
-
-    /* PURPOSE */
-
-    if ($purpose === "") {
-        $errors["purpose"] = "Please tell us what the loan is for.";
-    } elseif (strlen($purpose) > 500) {
-        $errors["purpose"] = "Purpose cannot be more than 500 characters.";
-    }
-
     return $errors;
 }
 
 
 /**
- * Validates a single uploaded file for the "Valid ID" / "Proof of
- * Income" fields. Only JPG and PNG are allowed. We don't trust the
- * file extension or the browser-supplied MIME type alone -- both
- * can be faked by renaming a file -- so we also call getimagesize()
- * to confirm the file's actual content is a real image.
+ * Secure document validation.
+ *
+ * Only JPG/JPEG/PNG images are accepted.
+ * Maximum size is 5 MB.
+ * Actual image content is checked using getimagesize().
  */
 function validate_uploaded_document($file, $field_label) {
-    // No file selected at all.
-    if (!isset($file) || $file["error"] === UPLOAD_ERR_NO_FILE) {
+
+    /* NO FILE */
+
+    if (!isset($file) || !is_array($file)) {
         return "{$field_label} is required.";
     }
+
+    if (!isset($file["error"])) {
+        return "{$field_label} is required.";
+    }
+
+    if ($file["error"] === UPLOAD_ERR_NO_FILE) {
+        return "{$field_label} is required.";
+    }
+
+    /* UPLOAD ERROR */
 
     if ($file["error"] !== UPLOAD_ERR_OK) {
         return "There was a problem uploading your {$field_label}. Please try again.";
     }
 
-    $max_bytes = 5 * 1024 * 1024; // 5 MB
-    if ($file["size"] > $max_bytes) {
+    /* TEMPORARY FILE MUST EXIST */
+
+    if (
+        !isset($file["tmp_name"]) ||
+        !is_string($file["tmp_name"]) ||
+        !is_uploaded_file($file["tmp_name"])
+    ) {
+        return "Invalid {$field_label} upload.";
+    }
+
+    /* FILE SIZE */
+
+    if (!isset($file["size"]) || !is_numeric($file["size"])) {
+        return "Invalid {$field_label} file.";
+    }
+
+    $max_bytes = 5 * 1024 * 1024;
+
+    if ((int) $file["size"] <= 0) {
+        return "{$field_label} cannot be empty.";
+    }
+
+    if ((int) $file["size"] > $max_bytes) {
         return "{$field_label} must be smaller than 5MB.";
     }
 
-    $allowed_extensions = ["jpg", "jpeg", "png"];
-    $extension = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
+    /* FILE EXTENSION */
+
+    if (!isset($file["name"]) || !is_string($file["name"])) {
+        return "Invalid {$field_label} file.";
+    }
+
+    $extension = strtolower(
+        pathinfo($file["name"], PATHINFO_EXTENSION)
+    );
+
+    $allowed_extensions = [
+        "jpg",
+        "jpeg",
+        "png"
+    ];
 
     if (!in_array($extension, $allowed_extensions, true)) {
         return "{$field_label} must be a JPG or PNG image.";
     }
 
-    // Confirm the file's actual content is a real image, not just
-    // something renamed to look like one.
-    $image_info = @getimagesize($file["tmp_name"]);
-    $allowed_mime_types = ["image/jpeg", "image/png"];
+    /* CHECK REAL IMAGE CONTENT */
 
-    if ($image_info === false || !in_array($image_info["mime"], $allowed_mime_types, true)) {
-        return "{$field_label} does not appear to be a valid image file.";
+    $image_info = @getimagesize($file["tmp_name"]);
+
+    if ($image_info === false) {
+        return "{$field_label} does not appear to be a valid image.";
+    }
+
+    $allowed_mime_types = [
+        "image/jpeg",
+        "image/png"
+    ];
+
+    if (
+        !isset($image_info["mime"]) ||
+        !in_array($image_info["mime"], $allowed_mime_types, true)
+    ) {
+        return "{$field_label} contains an unsupported image type.";
+    }
+
+    /* CHECK IMAGE DIMENSIONS */
+
+    if (
+        !isset($image_info[0]) ||
+        !isset($image_info[1]) ||
+        $image_info[0] <= 0 ||
+        $image_info[1] <= 0
+    ) {
+        return "{$field_label} has invalid image dimensions.";
     }
 
     return null;
 }
 
 
+/**
+ * Validate all required loan documents.
+ */
 function validate_loan_documents(
     $valid_id_file,
     $proof_of_income_file,
@@ -304,34 +399,74 @@ function validate_loan_documents(
 ) {
     $errors = [];
 
-    $valid_id_error = validate_uploaded_document($valid_id_file, "Valid ID");
+    /* VALID ID */
+
+    $valid_id_error = validate_uploaded_document(
+        $valid_id_file,
+        "Valid ID"
+    );
+
     if ($valid_id_error !== null) {
         $errors["valid_id"] = $valid_id_error;
     }
 
-    $proof_of_income_error = validate_uploaded_document($proof_of_income_file, "Proof of Income");
+    /* PROOF OF INCOME */
+
+    $proof_of_income_error = validate_uploaded_document(
+        $proof_of_income_file,
+        "Proof of Income"
+    );
+
     if ($proof_of_income_error !== null) {
         $errors["proof_of_income"] = $proof_of_income_error;
     }
 
-    $proof_of_address_error = validate_uploaded_document($proof_of_address_file, "Proof of Address");
+    /* PROOF OF ADDRESS */
+
+    $proof_of_address_error = validate_uploaded_document(
+        $proof_of_address_file,
+        "Proof of Address"
+    );
+
     if ($proof_of_address_error !== null) {
         $errors["proof_of_address"] = $proof_of_address_error;
     }
 
-    // Employment Certificate is only required for applicants who say
-    // they're Employed. Everyone else may skip it, but if a file was
-    // still attached, it's validated like any other upload.
-    $certificate_provided = isset($employment_certificate_file)
-        && $employment_certificate_file["error"] !== UPLOAD_ERR_NO_FILE;
+    /*
+     * EMPLOYMENT CERTIFICATE
+     *
+     * Required only when the applicant selected Employed.
+     */
+
+    $certificate_provided =
+        isset($employment_certificate_file) &&
+        is_array($employment_certificate_file) &&
+        isset($employment_certificate_file["error"]) &&
+        $employment_certificate_file["error"] !== UPLOAD_ERR_NO_FILE;
 
     if ($employment_status === "employed") {
-        $certificate_error = validate_uploaded_document($employment_certificate_file, "Employment Certificate");
+
+        $certificate_error = validate_uploaded_document(
+            $employment_certificate_file,
+            "Employment Certificate"
+        );
+
         if ($certificate_error !== null) {
             $errors["employment_certificate"] = $certificate_error;
         }
+
     } elseif ($certificate_provided) {
-        $certificate_error = validate_uploaded_document($employment_certificate_file, "Employment Certificate");
+
+        /*
+         * If a certificate was uploaded even though it is not required,
+         * still validate it.
+         */
+
+        $certificate_error = validate_uploaded_document(
+            $employment_certificate_file,
+            "Employment Certificate"
+        );
+
         if ($certificate_error !== null) {
             $errors["employment_certificate"] = $certificate_error;
         }

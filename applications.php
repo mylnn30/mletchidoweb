@@ -31,11 +31,13 @@ $loan_type_labels = [
         Mletchido Financial Group
     </div>
     <nav class="topbar-nav">
-        <a href="dashboard.php">Dashboard</a>
-        <a href="applications.php" class="is-active">My Applications</a>
-        <a href="profile.php">Profile</a>
-        <a href="logout.php">Sign Out</a>
-    </nav>
+    <a href="dashboard.php">Dashboard</a>
+    <a href="applications.php" class="is-active">My Applications</a>
+    <a href="payments.php">Payments</a>
+    <a href="notifications.php">Notifications</a>
+    <a href="profile.php">Profile</a>
+    <a href="logout.php">Sign Out</a>
+     </nav>
 </header>
 
 <main class="applications-page">

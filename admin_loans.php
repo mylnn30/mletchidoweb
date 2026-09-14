@@ -13,6 +13,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $loan_id = (int) ($_POST["loan_id"] ?? 0);
         $action = $_POST["action"] ?? "";
         $loan = get_loan_application_by_id_admin($loan_id);
+        if ($loan) {
+            $loan["interest_rate"] = $loan["interest_rate"] !== null ? (float) $loan["interest_rate"] : 0.0;
+            $loan["total_payable"] = calculate_loan_total_payable($loan["amount"], $loan["interest_rate"]);
+            $loan["installment_amount"] = get_installment_amount($loan["amount"], $loan["interest_rate"], $loan["term_months"], $loan["payment_frequency"]);
+            $loan["remaining_balance"] = get_loan_remaining_balance($loan_id);
+        }
 
         if (!$loan) {
             $errors["general"] = "Loan not found.";
@@ -31,12 +37,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             );
             $success_message = "Overdue notice sent to the borrower.";
         } elseif ($action === "apply_penalty") {
-            $penalty_amount = (float) ($_POST["penalty_amount"] ?? 0);
+            $settings = get_system_settings();
+            $late_fee_percent = isset($settings["late_fee_percent"])
+                ? (float) $settings["late_fee_percent"]
+                : 5.00;
+
+            $penalty_amount = round(
+                (float) $loan["installment_amount"] * $late_fee_percent / 100,
+                2
+            );
+
             if ($penalty_amount <= 0) {
-                $errors["general"] = "Enter a penalty amount greater than zero.";
+                $errors["general"] = "The late fee could not be calculated.";
             } else {
                 $result = apply_late_penalty($loan_id, $penalty_amount);
-                $success_message = ($result === true) ? "Late penalty applied." : null;
+                $success_message = ($result === true)
+                    ? "Late penalty of ₱" . number_format($penalty_amount, 2) . " applied."
+                    : null;
+
                 if ($result !== true) {
                     $errors["general"] = $result;
                 }
@@ -118,6 +136,7 @@ $today = date("Y-m-d");
                         <th>Interest</th>
                         <th>Term</th>
                         <th>Remaining Balance</th>
+                        <th>Installment</th>
                         <th>Next Due</th>
                         <th></th>
                     </tr>
@@ -139,6 +158,7 @@ $today = date("Y-m-d");
                             <td class="cell-muted"><?php echo $loan["interest_rate"] !== null ? number_format((float) $loan["interest_rate"], 2) . "%" : "Not set"; ?></td>
                             <td><?php echo (int) $loan["term_months"]; ?> mo</td>
                             <td>₱<?php echo number_format($loan["remaining_balance"], 2); ?></td>
+                            <td>₱<?php echo number_format($loan["installment_amount"], 2); ?> / <?php echo htmlspecialchars($loan["payment_frequency"], ENT_QUOTES, "UTF-8"); ?></td>
                             <td>
                                 <?php if ($loan["next_due_date"]): ?>
                                     <span class="status-badge <?php echo $is_overdue ? "status-rejected" : "status-pending"; ?>">
@@ -164,12 +184,11 @@ $today = date("Y-m-d");
                                     <?php endif; ?>
 
                                     <?php if ($is_overdue): ?>
-                                        <form action="admin_loans.php?filter=<?php echo htmlspecialchars($filter, ENT_QUOTES, "UTF-8"); ?>" method="POST" class="inline-form" onsubmit="return applyPenaltyPrompt(this);">
+                                        <form action="admin_loans.php?filter=<?php echo htmlspecialchars($filter, ENT_QUOTES, "UTF-8"); ?>" method="POST" class="inline-form" onsubmit="return confirm('Apply the configured late fee to this overdue loan?');">
                                             <?php csrf_field(); ?>
                                             <input type="hidden" name="loan_id" value="<?php echo (int) $loan["id"]; ?>">
                                             <input type="hidden" name="action" value="apply_penalty">
-                                            <input type="hidden" name="penalty_amount" class="penalty-amount-field">
-                                            <button type="submit" class="admin-btn admin-btn-reject">Apply Penalty</button>
+                                            <button type="submit" class="admin-btn admin-btn-reject">Apply Late Fee</button>
                                         </form>
                                     <?php endif; ?>
                                 </div>
@@ -183,16 +202,7 @@ $today = date("Y-m-d");
 
 </main>
 
-<script>
-function applyPenaltyPrompt(form) {
-    const amount = prompt("Enter the late penalty amount (₱):");
-    if (amount === null || amount.trim() === "" || isNaN(amount) || Number(amount) <= 0) {
-        return false;
-    }
-    form.querySelector(".penalty-amount-field").value = amount;
-    return true;
-}
-</script>
+
 
 </body>
 </html>
