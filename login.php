@@ -7,12 +7,27 @@ require_once "login_validation.php";
 require_once "login_function.php";
 require_once "admin_function.php";
 
-$errors = [];
+// Already logged in? Don't show the login form at all -- send them
+// straight to where they belong. This is also what fixes the
+// "I click back and see the login page" confusion: the browser can
+// still render a cached copy of this page from history, but a fresh
+// visit (reload, or clicking anything on it) immediately bounces
+// through to the dashboard since the session is still valid.
+if (!empty($_SESSION["user_id"])) {
+    header("Location: " . (user_is_admin($_SESSION["user_id"]) ? "admin_dashboard.php" : "dashboard.php"));
+    exit;
+}
+
+// Same reasoning as require_login.php: never let the browser cache
+// the login page itself, so logging out and hitting back doesn't
+// show a stale "already logged in" flash before redirecting.
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if (!csrf_verify($_POST["csrf_token"] ?? "")) {
-        $errors[] = "Your session has expired. Please try again.";
+        $_SESSION["login_flash_errors"] = ["Your session has expired. Please try again."];
     } else {
         $username = trim($_POST["username"] ?? "");
         $password = $_POST["password"] ?? "";
@@ -44,8 +59,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 ? $result
                 : "Invalid username or password.";
         }
+
+        // Flashed through the session and read back on the very next GET
+        // (below), rather than rendered directly from this POST response.
+        // A form submission is never the page actually left sitting in
+        // browser history this way, so there's nothing for the back
+        // button to trigger a "Confirm Form Resubmission" prompt on.
+        $_SESSION["login_flash_errors"] = $errors;
+        $_SESSION["login_flash_username"] = $username;
     }
+
+    header("Location: login.php");
+    exit;
 }
+
+// Pulled from the session and cleared immediately -- shown once, on the
+// GET that follows a failed POST, then gone even on a page refresh.
+$errors = $_SESSION["login_flash_errors"] ?? [];
+$flash_username = $_SESSION["login_flash_username"] ?? "";
+unset($_SESSION["login_flash_errors"], $_SESSION["login_flash_username"]);
 ?>
 
 <!DOCTYPE html>
@@ -84,7 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     type="text"
                     id="username"
                     name="username"
-                    value="<?php echo htmlspecialchars($_POST["username"] ?? "", ENT_QUOTES, "UTF-8"); ?>"
+                    value="<?php echo htmlspecialchars($flash_username, ENT_QUOTES, "UTF-8"); ?>"
                     autocomplete="username"
                     autofocus
                     required

@@ -267,6 +267,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             id="address"
                             name="address"
                             rows="3"
+                            placeholder="House No., Street, Barangay, City/Municipality, Province, ZIP Code"
                             class="<?php echo isset($errors['address']) ? 'input-error' : ''; ?>"
                             autocomplete="street-address"
                             aria-invalid="<?php echo isset($errors['address']) ? 'true' : 'false'; ?>"

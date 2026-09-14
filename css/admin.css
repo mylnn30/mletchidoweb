@@ -42,6 +42,8 @@ a {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
     padding: 18px 40px;
     background: var(--navy-900);
     border-bottom: 1px solid var(--line);
@@ -53,17 +55,20 @@ a {
     gap: 10px;
     font-weight: 600;
     font-size: 1.05rem;
+    white-space: nowrap;
 }
 
 .topbar-logo {
     width: 28px;
     height: auto;
     display: block;
+    flex-shrink: 0;
 }
 
 .topbar-nav {
     display: flex;
-    gap: 28px;
+    flex-wrap: wrap;
+    gap: clamp(14px, 2.5vw, 28px);
 }
 
 .topbar-nav a {
@@ -72,6 +77,7 @@ a {
     padding: 6px 0;
     border-bottom: 2px solid transparent;
     transition: color 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
 }
 
 .topbar-nav a:hover,
@@ -89,6 +95,7 @@ a {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+    white-space: nowrap;
 }
 
 /* ---------- Page shell ---------- */
@@ -103,14 +110,16 @@ a {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
     margin-bottom: 24px;
     gap: 16px;
 }
 
 .admin-header h1 {
     margin: 0 0 4px;
-    font-size: 1.6rem;
+    font-size: clamp(1.3rem, 3vw, 1.6rem);
     font-weight: 600;
+    word-break: break-word;
 }
 
 .admin-header p {
@@ -121,6 +130,7 @@ a {
 
 .admin-subnav {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     max-width: 1140px;
     margin: 20px auto 28px;
@@ -136,6 +146,7 @@ a {
     font-weight: 600;
     color: var(--text-lo);
     transition: color 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
 }
 
 .admin-subnav a:hover,
@@ -161,10 +172,11 @@ a {
     background: var(--navy-800);
     border: 1px solid var(--line);
     border-radius: var(--radius);
+    min-width: 0;
 }
 
 .stat-value {
-    font-size: 1.4rem;
+    font-size: clamp(1.15rem, 2.5vw, 1.4rem);
     font-weight: 700;
 }
 
@@ -179,7 +191,7 @@ a {
     background: var(--navy-800);
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    overflow: hidden;
+    overflow-x: auto;
 }
 
 .admin-table {
@@ -197,6 +209,7 @@ a {
     text-transform: uppercase;
     letter-spacing: 0.04em;
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .admin-table td {
@@ -223,10 +236,12 @@ a {
 /* ---------- Status badges (same look as the rest of the app) ---------- */
 
 .status-badge {
+    display: inline-block;
     padding: 3px 10px;
     border-radius: 999px;
     font-size: 0.75rem;
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .status-pending {
@@ -245,12 +260,14 @@ a {
 }
 
 .role-badge {
+    display: inline-block;
     padding: 3px 10px;
     border-radius: 999px;
     font-size: 0.75rem;
     font-weight: 600;
     background: var(--navy-700);
     color: var(--text-lo);
+    white-space: nowrap;
 }
 
 .role-badge.is-admin {
@@ -270,6 +287,7 @@ a {
     font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
+    white-space: nowrap;
     transition: background 0.15s ease, transform 0.15s ease;
 }
 
@@ -336,6 +354,7 @@ a {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    min-width: 0;
 }
 
 .detail-field-full {
@@ -352,11 +371,13 @@ a {
 .field-value {
     font-size: 0.98rem;
     color: var(--text-hi);
+    word-break: break-word;
 }
 
 .document-thumb {
     max-width: 220px;
     max-height: 150px;
+    width: 100%;
     border-radius: 8px;
     border: 1px solid var(--line);
     object-fit: cover;
@@ -409,6 +430,7 @@ a {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    min-width: 0;
 }
 
 .admin-form label {
@@ -429,6 +451,7 @@ a {
 .admin-form input[type="password"],
 .admin-form select,
 .admin-form textarea {
+    width: 100%;
     padding: 11px 14px;
     background: var(--navy-900);
     border: 1px solid var(--line);
@@ -459,12 +482,14 @@ a {
 
 .admin-search-bar {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 18px;
 }
 
 .admin-search-bar input[type="text"] {
     flex: 1;
+    min-width: 180px;
     padding: 10px 16px;
     background: var(--navy-800);
     border: 1px solid var(--line);
@@ -495,6 +520,7 @@ a {
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-lo);
+    white-space: nowrap;
 }
 
 .report-tab.is-active {
@@ -539,16 +565,56 @@ a {
 
 /* ---------- Responsive ---------- */
 
+@media (max-width: 1080px) {
+    .dashboard-topbar {
+        padding: 16px 24px;
+    }
+}
+
 @media (max-width: 960px) {
     .stat-row {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .admin-table-wrap {
-        overflow-x: auto;
+    .detail-grid {
+        grid-template-columns: 1fr;
     }
 
+    .admin-form .form-row {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .dashboard-topbar {
+        padding: 14px 20px;
+    }
+
+    .topbar-nav {
+        gap: 14px 20px;
+    }
+
+    .admin-page {
+        padding: 36px 18px 60px;
+    }
+
+    .admin-subnav {
+        padding: 0 18px;
+        margin: 16px auto 24px;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 12px 14px;
+    }
+
+    .admin-form,
+    .status-update-box,
     .detail-grid {
+        padding: 20px;
+    }
+
+    .admin-form .form-row {
         grid-template-columns: 1fr;
     }
 }
@@ -561,8 +627,39 @@ a {
         padding: 16px 20px;
     }
 
+    .topbar-nav {
+        gap: 10px 18px;
+        width: 100%;
+    }
+
     .admin-page {
         padding: 32px 18px 60px;
+    }
+
+    .stat-row {
+        grid-template-columns: 1fr;
+    }
+
+    .row-actions {
+        width: 100%;
+    }
+
+    .inline-form,
+    .admin-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 360px) {
+    .stat-value {
+        font-size: 1.05rem;
+    }
+
+    .admin-form,
+    .status-update-box,
+    .detail-grid,
+    .stat-tile {
+        padding: 16px;
     }
 }
 
@@ -572,4 +669,11 @@ a:focus-visible,
 button:focus-visible {
     outline: 2px solid var(--blue-500);
     outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
 }

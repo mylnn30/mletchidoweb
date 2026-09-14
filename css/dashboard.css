@@ -42,6 +42,8 @@ a {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
     padding: 18px 40px;
     background: var(--navy-900);
     border-bottom: 1px solid var(--line);
@@ -54,17 +56,20 @@ a {
     font-weight: 600;
     font-size: 1.05rem;
     letter-spacing: 0.01em;
+    white-space: nowrap;
 }
 
 .topbar-logo {
     width: 28px;
     height: auto;
     display: block;
+    flex-shrink: 0;
 }
 
 .topbar-nav {
     display: flex;
-    gap: 28px;
+    flex-wrap: wrap;
+    gap: clamp(14px, 2.5vw, 28px);
 }
 
 .topbar-nav a {
@@ -73,6 +78,7 @@ a {
     padding: 6px 0;
     border-bottom: 2px solid transparent;
     transition: color 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
 }
 
 .topbar-nav a:hover,
@@ -106,7 +112,8 @@ a {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
+    flex-wrap: wrap;
+    gap: 20px;
     padding: 28px 32px;
     margin-bottom: 28px;
     border-radius: var(--radius);
@@ -118,7 +125,7 @@ a {
 
 .dashboard-welcome h1 {
     margin: 0 0 6px;
-    font-size: 1.7rem;
+    font-size: clamp(1.35rem, 3vw, 1.7rem);
     font-weight: 600;
 }
 
@@ -137,6 +144,7 @@ a {
     font-size: 0.9rem;
     border-radius: 8px;
     transition: background 0.15s ease, transform 0.15s ease;
+    white-space: nowrap;
 }
 
 .welcome-cta:hover,
@@ -162,10 +170,11 @@ a {
     background: var(--navy-800);
     border: 1px solid var(--line);
     border-radius: var(--radius);
+    min-width: 0;
 }
 
 .stat-value {
-    font-size: 1.5rem;
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
     font-weight: 700;
 }
 
@@ -190,6 +199,7 @@ a {
     padding: 24px;
     display: flex;
     flex-direction: column;
+    min-width: 0;
     transition: border-color 0.15s ease, transform 0.15s ease;
 }
 
@@ -228,6 +238,7 @@ a {
     margin: 0 0 8px;
     font-size: 0.9rem;
     color: var(--text-lo);
+    word-break: break-word;
 }
 
 .dashboard-card p strong {
@@ -269,10 +280,19 @@ a {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
     font-size: 0.88rem;
 }
 
+.activity-list li span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .status-badge {
+    flex-shrink: 0;
     padding: 3px 10px;
     border-radius: 999px;
     font-size: 0.75rem;
@@ -296,10 +316,35 @@ a {
 
 /* ---------- Responsive ---------- */
 
+@media (max-width: 1080px) {
+    .dashboard-topbar {
+        padding: 16px 24px;
+    }
+}
+
 @media (max-width: 860px) {
     .stat-row,
     .dashboard-cards {
         grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .dashboard-topbar {
+        padding: 14px 20px;
+    }
+
+    .topbar-nav {
+        gap: 14px 20px;
+    }
+
+    .dashboard-welcome {
+        padding: 22px 24px;
+    }
+
+    .welcome-cta {
+        width: 100%;
+        text-align: center;
     }
 }
 
@@ -312,8 +357,8 @@ a {
     }
 
     .topbar-nav {
-        gap: 18px;
-        flex-wrap: wrap;
+        gap: 10px 18px;
+        width: 100%;
     }
 
     .dashboard-page {
@@ -328,6 +373,18 @@ a {
     .stat-row,
     .dashboard-cards {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 360px) {
+    .stat-value {
+        font-size: 1.1rem;
+    }
+
+    .dashboard-welcome,
+    .dashboard-card,
+    .stat-tile {
+        padding: 18px;
     }
 }
 
