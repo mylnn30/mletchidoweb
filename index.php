@@ -1,4 +1,12 @@
 <?php
+
+require_once "session_bootstrap.php";
+start_secure_session();
+
+require_once "remember_login.php";
+require_once "admin_function.php";
+
+restore_login_from_cookie();
 // Mletchido Financial Group - Homepage
 // PHP is used for server-side loan calculation and form validation.
 
@@ -120,7 +128,29 @@ $testimonials = [
                     <li class="nav-item"><a class="nav-link" href="#about">About Us</a></li>
                     <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
                     <li class="nav-item"><a class="nav-link" href="check_eligibility.php">Check Eligibility</a></li>
-                    <li class="nav-item ms-lg-2"><a class="btn btn-primary btn-sm px-4" href="#apply">Apply Now</a></li>
+                    <?php if (!empty($_SESSION["user_id"])): ?>
+    <li class="nav-item dropdown ms-lg-2">
+        <a class="nav-link profile-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <?php echo htmlspecialchars($_SESSION["first_name"] ?? $_SESSION["username"], ENT_QUOTES, "UTF-8"); ?>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end profile-menu" aria-labelledby="profileDropdown">
+            <li>
+                <a class="dropdown-item" href="dashboard.php">Dashboard</a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="profile.php">Profile</a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item logout-item" href="logout.php">Logout</a>
+            </li>
+        </ul>
+    </li>
+<?php else: ?>
+    <li class="nav-item ms-lg-2">
+        <a class="btn btn-primary btn-sm px-4" href="register.php">Apply Now</a>
+    </li>
+<?php endif; ?>
                 </ul>
             </div>
         </div>
@@ -243,7 +273,6 @@ $testimonials = [
                     <small>Estimated Rate <b><?= number_format($annualRate, 2) ?>% APR</b></small>
                 </div>
 
-                <button class="btn btn-light w-100" type="submit" name="calculate_loan">Calculate &amp; Apply</button>
                 <p class="calculator-note">This calculator provides an estimate only. Final loan terms are subject to eligibility, credit assessment, document review, and approval.</p>
             </form>
         </div>

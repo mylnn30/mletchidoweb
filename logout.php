@@ -1,12 +1,16 @@
 <?php
-session_start();
+require_once "session_bootstrap.php";
+start_secure_session();
 
-// Clear all session variables
+require_once "remember_login.php";
+
+delete_remember_token();
+
 $_SESSION = [];
 
-// Delete the session cookie itself, if the client is using one
 if (ini_get("session.use_cookies")) {
     $params = session_get_cookie_params();
+
     setcookie(
         session_name(),
         "",
@@ -18,8 +22,8 @@ if (ini_get("session.use_cookies")) {
     );
 }
 
-// Destroy the session data server-side
 session_destroy();
 
 header("Location: login.php");
 exit;
+?>
